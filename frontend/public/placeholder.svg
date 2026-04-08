@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#f0f0f0"/>
+  <rect x="1" y="1" width="398" height="398" fill="none" stroke="#d0d0d0" stroke-width="2"/>
+
+  <!-- 銀幣圖示 -->
+  <circle cx="200" cy="165" r="72" fill="#c8c8c8" stroke="#b0b0b0" stroke-width="3"/>
+  <circle cx="200" cy="165" r="58" fill="none" stroke="#d8d8d8" stroke-width="2"/>
+  <text x="200" y="175" text-anchor="middle" font-family="serif" font-size="52" font-weight="bold" fill="#a0a0a0">Ag</text>
+
+  <!-- 說明文字 -->
+  <text x="200" y="278" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">尚無商品圖片</text>
+  <text x="200" y="300" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#c8c8c8">No Image</text>
+</svg>

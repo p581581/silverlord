@@ -1,0 +1,48 @@
+:root {
+  /* 字型系統 */
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body:    'EB Garamond', Georgia, serif;
+  --font-ui:      Inter, system-ui, -apple-system, sans-serif;
+
+  /* 色彩 */
+  --color-ink:    #0f172a;
+  --color-muted:  #64748b;
+  --color-faint:  #94a3b8;
+  --color-bg:     #faf9f7;   /* 略帶暖色的米白 */
+  --color-surface:#ffffff;
+  --color-border: #e8e3dc;
+
+  font-family: var(--font-ui);
+  line-height: 1.6;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  display: block;
+}
+
+#app {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+a { text-decoration: none; color: inherit; }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+p { margin: 0; }

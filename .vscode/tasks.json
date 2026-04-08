@@ -1,0 +1,77 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "backend: go run",
+      "type": "shell",
+      "command": "go run .",
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+        "env": {
+          "DB_HOST": "localhost",
+          "DB_PORT": "5432",
+          "DB_USER": "postgres",
+          "DB_PASSWORD": "postgres",
+          "DB_NAME": "silverlord",
+          "JWT_SECRET": "dev-secret",
+          "ADMIN_PASSWORD": "admin123",
+          "PORT": "8080"
+        }
+      },
+      "group": "build",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: npm run dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend",
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE",
+          "endsPattern": "Local:.*localhost"
+        }
+      }
+    },
+    {
+      "label": "backend: go build",
+      "type": "shell",
+      "command": "go build -o bin/silverlord.exe .",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "panel": "shared",
+        "reveal": "always"
+      },
+      "problemMatcher": "$go"
+    },
+    {
+      "label": "postgres: docker up",
+      "type": "shell",
+      "command": "docker run --rm --name silverlord-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=silverlord -p 5432:5432 postgres:15-alpine",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

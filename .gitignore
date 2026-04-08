@@ -1,0 +1,23 @@
+# 環境變數（絕對不能 commit）
+backend/.env
+frontend/.env.local
+
+# Go
+backend/bin/
+backend/*.exe
+backend/silverlord
+backend/web/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# 上傳圖片
+backend/uploads/
+
+# IDE
+.vscode/settings.json
+*.log
+
+
+8721236466:AAGd0DqqHa42LsrC2P2KW9h7nKCaduA5TBo
