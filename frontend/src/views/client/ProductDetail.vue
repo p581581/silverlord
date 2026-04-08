@@ -85,11 +85,15 @@
     </main>
 
     <Footer />
+    <button v-show="showScrollTop" class="scroll-top-btn" @click="scrollToTop" aria-label="回到頂部">
+      <i class="pi pi-chevron-up" />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useScrollTop } from '@/composables/useScrollTop'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -109,6 +113,8 @@ const router = useRouter()
 const toast = useToast()
 const priceStore = usePriceStore()
 const cartStore = useCartStore()
+
+const { showScrollTop, scrollToTop } = useScrollTop()
 
 const product = ref<any>(null)
 const loading = ref(true)

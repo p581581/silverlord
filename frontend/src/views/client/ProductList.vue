@@ -84,6 +84,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useScrollTop } from '@/composables/useScrollTop'
 import { useI18n } from 'vue-i18n'
 import ProgressSpinner from 'primevue/progressspinner'
 import Navbar from '@/components/shared/Navbar.vue'
@@ -96,6 +97,8 @@ import api from '@/api'
 const { t } = useI18n()
 const priceStore = usePriceStore()
 const cartStore = useCartStore()
+
+const { showScrollTop, scrollToTop } = useScrollTop()
 
 const products = ref<any[]>([])
 const loading = ref(false)
@@ -123,58 +126,19 @@ function scrollToProducts() {
 
 let productTimer: ReturnType<typeof setInterval>
 
-// Scroll to top
-const showScrollTop = ref(false)
-
-function onScroll() {
-  const scrollY = window.scrollY ?? document.documentElement.scrollTop
-  showScrollTop.value = scrollY > 200
-}
-
-function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
 onMounted(() => {
-  window.scrollTo(0, 0)
-  window.addEventListener('scroll', onScroll, { passive: true })
   priceStore.startAutoRefresh()
   fetchProducts()
   productTimer = setInterval(fetchProducts, 60_000)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
   priceStore.stopAutoRefresh()
   clearInterval(productTimer)
 })
 </script>
 
 <style scoped>
-.scroll-top-btn {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  border: 1px solid #aaaaaa;
-  background: rgba(30, 30, 30, 0.8);
-  color: #cccccc;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-  transition: background 0.2s, transform 0.2s;
-  z-index: 999;
-}
-.scroll-top-btn:hover {
-  background: rgba(180, 180, 180, 0.15);
-  transform: translateY(-2px);
-}
-
 .page {
   --section-pad: 5rem;
   min-height: 100vh;

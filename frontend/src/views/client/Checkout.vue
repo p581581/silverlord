@@ -156,11 +156,15 @@
         </div>
       </div>
     </main>
+    <button v-show="showScrollTop" class="scroll-top-btn" @click="scrollToTop" aria-label="回到頂部">
+      <i class="pi pi-chevron-up" />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useScrollTop } from '@/composables/useScrollTop'
 import { useI18n } from 'vue-i18n'
 import { useRouter, RouterLink } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -177,6 +181,8 @@ const { t } = useI18n()
 const router = useRouter()
 const toast = useToast()
 const cartStore = useCartStore()
+
+const { showScrollTop, scrollToTop } = useScrollTop()
 
 const submitting = ref(false)
 const email = ref('')
@@ -203,7 +209,9 @@ onMounted(async () => {
     shipFees.value = res.data
   } catch {}
 })
-onUnmounted(() => cartStore.stopCheckoutTimer())
+onUnmounted(() => {
+  cartStore.stopCheckoutTimer()
+})
 
 function isValidEmail(e: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)

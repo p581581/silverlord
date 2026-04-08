@@ -5,6 +5,7 @@ import Aura from '@primeuix/themes/aura'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
 import 'primeicons/primeicons.css'
+import '@/assets/scroll-top.css'
 
 import { i18n } from '@/i18n'
 import router from '@/router'

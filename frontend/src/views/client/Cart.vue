@@ -125,7 +125,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
+import { useScrollTop } from '@/composables/useScrollTop'
 import { useI18n } from 'vue-i18n'
 import { useRouter, RouterLink } from 'vue-router'
 import Button from 'primevue/button'
@@ -138,24 +139,14 @@ import { resolveImage } from '@/api/image'
 const { t } = useI18n()
 const router = useRouter()
 const cartStore = useCartStore()
+const { showScrollTop, scrollToTop } = useScrollTop()
 
 onMounted(() => {
-  window.scrollTo(0, 0)
-  window.addEventListener('scroll', onScroll, { passive: true })
   cartStore.startCheckoutTimer()
 })
 onUnmounted(() => {
   cartStore.stopCheckoutTimer()
-  window.removeEventListener('scroll', onScroll)
 })
-
-const showScrollTop = ref(false)
-function onScroll() {
-  showScrollTop.value = (window.scrollY ?? document.documentElement.scrollTop) > 200
-}
-function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
 
 function goCheckout() {
   if (cartStore.isCheckoutExpired) return
@@ -167,31 +158,6 @@ function refreshCart() {
 </script>
 
 <style scoped>
-.scroll-top-btn {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  border: 1px solid #aaaaaa;
-  background: rgba(30, 30, 30, 0.8);
-  color: #cccccc;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-  transition: background 0.2s, transform 0.2s;
-  z-index: 999;
-}
-
-.scroll-top-btn:hover {
-  background: rgba(180, 180, 180, 0.15);
-  transform: translateY(-2px);
-}
-
 .page {
   min-height: 100vh;
   background: #f8fafc;
@@ -272,7 +238,6 @@ function refreshCart() {
 
   .item-bottom {
     flex-wrap: wrap;
-    gap: .5rem;
   }
 
   .qty-control {
@@ -379,6 +344,7 @@ function refreshCart() {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  gap: .75rem
 }
 
 .qty-control {

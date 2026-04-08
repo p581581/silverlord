@@ -17,6 +17,7 @@
             :label="t('orderQuery.search')"
             icon="pi pi-search"
             :loading="loading"
+            class="search-btn"
             @click="search" />
         </div>
 
@@ -109,7 +110,7 @@
             <div class="price-row">
               <span>{{ t('checkout.shipFee') }}</span>
               <span>{{ result.ship_fee > 0 ? 'NT$ ' + result.ship_fee.toLocaleString() : t('checkout.shipFreeText')
-                }}</span>
+              }}</span>
             </div>
             <div class="price-row total-row">
               <span>{{ t('checkout.grandTotal') }}</span>
@@ -155,7 +156,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
+import { useScrollTop } from '@/composables/useScrollTop'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -173,6 +175,7 @@ import api from '@/api'
 
 const { t } = useI18n()
 const toast = useToast()
+const { showScrollTop, scrollToTop } = useScrollTop()
 
 const orderNo = ref('')
 const loading = ref(false)
@@ -253,53 +256,9 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleString()
 }
 
-// Scroll to top
-const showScrollTop = ref(false)
-
-function onScroll() {
-  const scrollY = window.scrollY ?? document.documentElement.scrollTop
-  showScrollTop.value = scrollY > 200
-}
-
-function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-onMounted(() => {
-  window.scrollTo(0, 0)
-  window.addEventListener('scroll', onScroll, { passive: true })
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
-})
 </script>
 
 <style scoped>
-.scroll-top-btn {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  border: 1px solid #aaaaaa;
-  background: rgba(30, 30, 30, 0.8);
-  color: #cccccc;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-  transition: background 0.2s, transform 0.2s;
-  z-index: 999;
-}
-.scroll-top-btn:hover {
-  background: rgba(180, 180, 180, 0.15);
-  transform: translateY(-2px);
-}
-
 .page {
   min-height: 100vh;
   background: #f8fafc;
@@ -335,6 +294,15 @@ onUnmounted(() => {
 
 .search-input {
   flex: 1;
+}
+
+@media (max-width: 480px) {
+  .search-btn :deep(.p-button-label) {
+    display: none;
+  }
+  .search-btn :deep(.p-button-icon) {
+    margin: 0;
+  }
 }
 
 .history-section {
