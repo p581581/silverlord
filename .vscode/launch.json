@@ -8,6 +8,7 @@
       "mode": "auto",
       "program": "${workspaceFolder}/backend",
       "cwd": "${workspaceFolder}/backend",
+      "output": "${workspaceFolder}/backend/_debug_bin.exe",
       "args": []
     },
     {
