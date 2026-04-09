@@ -57,19 +57,11 @@
                 </div>
 
                 <div class="item-bottom">
-                  <div class="qty-control">
-                    <button class="qty-btn"
-                      @click="cartStore.updateQuantity(item.product_id, Math.max(1, item.quantity - 1))">
-                      <i class="pi pi-minus" />
-                    </button>
-                    <span class="qty-value">{{ item.quantity }}</span>
-                    <button
-                      class="qty-btn"
-                      :disabled="item.stock_qty != null && item.quantity >= item.stock_qty"
-                      @click="cartStore.updateQuantity(item.product_id, item.quantity + 1)">
-                      <i class="pi pi-plus" />
-                    </button>
-                  </div>
+                  <QtyInput
+                    :model-value="item.quantity"
+                    :max="item.stock_qty ?? undefined"
+                    @update:model-value="(v) => cartStore.updateQuantity(item.product_id, v)"
+                  />
                   <span class="item-subtotal">
                     NT$ {{ (item.unit_price * item.quantity).toLocaleString() }}
                   </span>
@@ -131,6 +123,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter, RouterLink } from 'vue-router'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
+import QtyInput from '@/components/shared/QtyInput.vue'
 import Navbar from '@/components/shared/Navbar.vue'
 import Footer from '@/components/shared/Footer.vue'
 import { useCartStore } from '@/stores/cart'
@@ -347,45 +340,6 @@ function refreshCart() {
   gap: .75rem
 }
 
-.qty-control {
-  display: flex;
-  align-items: center;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #f8fafc;
-}
-
-.qty-btn {
-  background: none;
-  border: none;
-  width: 2rem;
-  height: 2rem;
-  color: #64748b;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  transition: background 0.15s;
-}
-
-.qty-btn:hover:not(:disabled) {
-  background: #e2e8f0;
-}
-
-.qty-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.qty-value {
-  min-width: 2.5rem;
-  text-align: center;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: #0f172a;
-}
 
 .item-subtotal {
   font-size: 1.1rem;

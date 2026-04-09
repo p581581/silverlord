@@ -18,7 +18,7 @@ export default {
     preOrder: '予約',
     stockQty: '在庫数',
     expectedArrival: '入荷予定日',
-    insufficientStock: '在庫不足',
+    insufficientStock: '入荷中',
   },
   cart: {
     title: 'ショッピングカート',

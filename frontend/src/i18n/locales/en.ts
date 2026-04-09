@@ -18,7 +18,7 @@ export default {
     preOrder: 'Pre-Order',
     stockQty: 'Stock Qty',
     expectedArrival: 'Est. Arrival',
-    insufficientStock: 'Insufficient stock',
+    insufficientStock: 'Restocking',
   },
   cart: {
     title: 'Cart',

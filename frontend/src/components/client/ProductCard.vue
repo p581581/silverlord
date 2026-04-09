@@ -10,8 +10,8 @@
         @error="(e: any) => { e.target.src = '/placeholder.svg' }"
       />
       <div class="image-overlay" />
-      <span class="type-badge" :class="product.product_type === 'pre_order' ? 'pre-order' : 'in-stock'">
-        {{ product.product_type === 'pre_order' ? t('product.preOrder') : t('product.inStock') }}
+      <span class="type-badge" :class="product.product_type === 'pre_order' ? 'pre-order' : (product.stock_qty === 0 ? 'restocking' : 'in-stock')">
+        {{ product.product_type === 'pre_order' ? t('product.preOrder') : (product.stock_qty === 0 ? t('product.insufficientStock') : t('product.inStock')) }}
       </span>
     </RouterLink>
 
@@ -39,15 +39,11 @@
 
       <!-- 數量 + 加入購物車 -->
       <div class="cart-row" :class="{ disabled: isSoldOut }">
-        <div class="qty-control">
-          <button class="qty-btn" :disabled="isSoldOut || qty <= 1" @click.prevent="qty = Math.max(1, qty - 1)">
-            <i class="pi pi-minus" />
-          </button>
-          <span class="qty-value">{{ qty }}</span>
-          <button class="qty-btn" :disabled="isSoldOut || (product.product_type === 'in_stock' && qty >= product.stock_qty)" @click.prevent="qty++">
-            <i class="pi pi-plus" />
-          </button>
-        </div>
+        <QtyInput
+          v-model="qty"
+          :max="product.product_type === 'in_stock' ? product.stock_qty : undefined"
+          :disabled="isSoldOut"
+        />
         <button class="add-btn" :disabled="isSoldOut" @click.prevent="addToCart">
           <i class="pi pi-shopping-cart" />
           {{ t('product.addToCart') }}
@@ -70,6 +66,7 @@ import ProgressBar from 'primevue/progressbar'
 import { usePriceStore } from '@/stores/price'
 import { useCartStore } from '@/stores/cart'
 import { resolveImage } from '@/api/image'
+import QtyInput from '@/components/shared/QtyInput.vue'
 
 interface Product {
   id: number
@@ -180,8 +177,9 @@ function addToCart() {
   letter-spacing: 0.03em;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
-.type-badge.in-stock  { background: #15803d; color: white; }
-.type-badge.pre-order { background: #1d4ed8; color: white; }
+.type-badge.in-stock   { background: #15803d; color: white; }
+.type-badge.pre-order  { background: #1d4ed8; color: white; }
+.type-badge.restocking { background: #f87171; color: white; }
 
 /* ── Body ── */
 .product-body {
@@ -252,38 +250,6 @@ function addToCart() {
 }
 .cart-row.disabled { opacity: 0.45; pointer-events: none; }
 
-.qty-control {
-  display: flex;
-  align-items: center;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #f8fafc;
-  flex-shrink: 0;
-}
-.qty-btn {
-  background: none;
-  border: none;
-  width: 2rem;
-  height: 2.2rem;
-  color: #475569;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  transition: background 0.15s, color 0.15s;
-}
-.qty-btn:hover:not(:disabled) { background: #e2e8f0; color: #0f172a; }
-.qty-btn:disabled { color: #cbd5e1; cursor: not-allowed; }
-.qty-value {
-  min-width: 2.2rem;
-  text-align: center;
-  font-weight: 700;
-  font-size: 0.88rem;
-  color: #0f172a;
-  user-select: none;
-}
 
 .add-btn {
   flex: 1;

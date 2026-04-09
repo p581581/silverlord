@@ -23,7 +23,7 @@
     <!-- 主導覽列 -->
     <nav class="navbar">
       <RouterLink to="/" class="navbar-brand">
-        <i class="pi pi-shield brand-icon" />
+        <img src="@/assets/img/logo.png" alt="Silver Lord" class="brand-logo" />
         <span class="brand-text">SILVER LORD</span>
       </RouterLink>
 
@@ -47,8 +47,7 @@
           option-label="label"
           option-value="value"
           class="locale-select nav-hide-xs"
-          @change="onLocaleChange"
-        />
+          @change="onLocaleChange" />
 
         <!-- 漢堡按鈕：xs 才顯示 -->
         <button class="hamburger" aria-label="選單" @click="drawerOpen = true">
@@ -58,10 +57,11 @@
     </nav>
 
     <!-- Drawer -->
-    <Drawer v-model:visible="drawerOpen" position="right" class="nav-drawer" :pt="{ root: { style: 'width: 280px; background: #0f172a;' } }">
+    <Drawer v-model:visible="drawerOpen" position="right" class="nav-drawer"
+      :pt="{ root: { style: 'width: 280px; background: #0f172a;' } }">
       <template #header>
         <div class="drawer-header">
-          <i class="pi pi-shield" style="color: #94a3b8; font-size: 1.2rem;" />
+          <img src="@/assets/img/logo.png" alt="Silver Lord" class="drawer-logo" />
           <span class="drawer-brand">SILVER LORD</span>
         </div>
       </template>
@@ -71,11 +71,13 @@
           <i class="pi pi-home" />
           {{ t('nav.products') }}
         </RouterLink>
-        <RouterLink to="/order-query" class="drawer-link" :class="{ active: route.path === '/order-query' }" @click="drawerOpen = false">
+        <RouterLink to="/order-query" class="drawer-link" :class="{ active: route.path === '/order-query' }"
+          @click="drawerOpen = false">
           <i class="pi pi-search" />
           {{ t('orderQuery.title') }}
         </RouterLink>
-        <RouterLink to="/cart" class="drawer-link" :class="{ active: route.path === '/cart' }" @click="drawerOpen = false">
+        <RouterLink to="/cart" class="drawer-link" :class="{ active: route.path === '/cart' }"
+          @click="drawerOpen = false">
           <i class="pi pi-shopping-cart" />
           {{ t('nav.cart') }}
           <span v-if="cartCount > 0" class="drawer-badge">{{ cartCount }}</span>
@@ -84,14 +86,9 @@
 
       <div class="drawer-footer">
         <div class="drawer-label">語言 / Language</div>
-        <Select
-          v-model="currentLocale"
-          :options="localeOptions"
-          option-label="label"
-          option-value="value"
+        <Select v-model="currentLocale" :options="localeOptions" option-label="label" option-value="value"
           class="w-full"
-          @change="onLocaleChange"
-        />
+          @change="onLocaleChange" />
       </div>
     </Drawer>
   </div>
@@ -155,6 +152,7 @@ onMounted(() => {
   padding: 0.4rem 0;
   overflow: hidden;
 }
+
 .ticker-inner {
   max-width: 1280px;
   margin: 0 auto;
@@ -166,7 +164,11 @@ onMounted(() => {
   overflow-x: auto;
   scrollbar-width: none;
 }
-.ticker-inner::-webkit-scrollbar { display: none; }
+
+.ticker-inner::-webkit-scrollbar {
+  display: none;
+}
+
 .ticker-live {
   display: flex;
   align-items: center;
@@ -176,17 +178,34 @@ onMounted(() => {
   font-family: Inter, system-ui, sans-serif;
   white-space: nowrap;
 }
+
 .ticker-dot {
   font-size: 0.5rem;
   color: #4ade80;
   animation: pulse-dot 2s infinite;
 }
+
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
 }
-.ticker-sep  { color: #334155; user-select: none; }
-.ticker-val  { color: #f8fafc; font-weight: 700; }
+
+.ticker-sep {
+  color: #334155;
+  user-select: none;
+}
+
+.ticker-val {
+  color: #f8fafc;
+  font-weight: 700;
+}
 
 /* ── Navbar ── */
 .navbar {
@@ -195,8 +214,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
 }
+
 .navbar-brand {
   display: flex;
   align-items: center;
@@ -205,19 +225,29 @@ onMounted(() => {
   color: #f1f5f9;
   text-decoration: none;
 }
-.brand-icon  { font-size: 1.4rem; color: #94a3b8; }
-.brand-text  {
+
+.brand-logo {
+  height: 2rem;
+  width: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+.brand-text {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.1em;
+  line-height: 1.8;
   color: #f1f5f9;
 }
+
 .navbar-links {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
+
 .nav-link {
   color: #94a3b8;
   font-size: 0.9rem;
@@ -229,8 +259,17 @@ onMounted(() => {
   white-space: nowrap;
   position: relative;
 }
-.nav-link:hover { color: #f1f5f9; background: rgba(255,255,255,0.06); }
-.nav-link.active { color: #fff; font-weight: 600; }
+
+.nav-link:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-link.active {
+  color: #fff;
+  font-weight: 600;
+}
+
 .nav-link.active::after {
   content: '';
   position: absolute;
@@ -241,6 +280,7 @@ onMounted(() => {
   background: white;
   border-radius: 2px;
 }
+
 .cart-btn {
   position: relative;
   display: flex;
@@ -254,7 +294,12 @@ onMounted(() => {
   margin: 0 0.25rem;
   font-size: 1.15rem;
 }
-.cart-btn:hover { color: white; background: rgba(255,255,255,0.08); }
+
+.cart-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .cart-badge {
   position: absolute;
   top: 2px;
@@ -272,7 +317,11 @@ onMounted(() => {
   padding: 0 3px;
   line-height: 1;
 }
-.locale-select { width: 120px; margin-left: 0.5rem; }
+
+.locale-select {
+  width: 120px;
+  margin-left: 0.5rem;
+}
 
 .locale-select :deep(.p-select) {
   --p-select-background: rgba(255, 255, 255, 0.07);
@@ -299,7 +348,11 @@ onMounted(() => {
   transition: color 0.15s, background 0.15s;
   margin-left: 0.25rem;
 }
-.hamburger:hover { color: white; background: rgba(255,255,255,0.08); }
+
+.hamburger:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+}
 
 /* ── Drawer 內容 ── */
 .drawer-header {
@@ -307,6 +360,14 @@ onMounted(() => {
   align-items: center;
   gap: 0.6rem;
 }
+
+.drawer-logo {
+  height: 1.6rem;
+  width: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
 .drawer-brand {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.1rem;
@@ -314,12 +375,14 @@ onMounted(() => {
   letter-spacing: 0.18em;
   color: #f1f5f9;
 }
+
 .drawer-nav {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   padding: 1rem 0;
 }
+
 .drawer-link {
   display: flex;
   align-items: center;
@@ -332,8 +395,18 @@ onMounted(() => {
   text-decoration: none;
   transition: color 0.15s, background 0.15s;
 }
-.drawer-link:hover { color: #f1f5f9; background: rgba(255,255,255,0.07); }
-.drawer-link.active { color: #fff; background: rgba(255,255,255,0.1); font-weight: 600; }
+
+.drawer-link:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.drawer-link.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
 .drawer-badge {
   margin-left: auto;
   background: #ef4444;
@@ -348,12 +421,14 @@ onMounted(() => {
   justify-content: center;
   padding: 0 4px;
 }
+
 .drawer-footer {
   position: absolute;
   bottom: 1.5rem;
   left: 1.25rem;
   right: 1.25rem;
 }
+
 .drawer-label {
   font-size: 0.78rem;
   color: #475569;
@@ -363,10 +438,21 @@ onMounted(() => {
 
 /* ── RWD ── */
 @media (max-width: 640px) {
-  .ticker-live-text { display: none; }
-  .nav-hide-xs { display: none; }
-  .hamburger   { display: flex; }
-  .brand-text  { font-size: 1.05rem; }
+  .ticker-live-text {
+    display: none;
+  }
+
+  .nav-hide-xs {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .brand-text {
+    font-size: 1.05rem;
+  }
 }
 </style>
 
@@ -377,18 +463,21 @@ onMounted(() => {
   border-bottom: 1px solid #1e293b;
   padding: 1.1rem 1.25rem;
 }
+
 .nav-drawer .p-drawer-content {
   background: #0f172a;
   padding: 0 1.25rem;
   flex: 1;
   overflow-y: auto;
 }
+
 .nav-drawer .p-drawer-close-button {
   color: #64748b !important;
 }
+
 .nav-drawer .p-drawer-close-button:hover {
   color: #f1f5f9 !important;
-  background: rgba(255,255,255,0.08) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* locale select panel */

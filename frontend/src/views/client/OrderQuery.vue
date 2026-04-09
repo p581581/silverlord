@@ -70,6 +70,7 @@
           <Divider />
 
           <h3 class="items-title">{{ t('orderQuery.items') }}</h3>
+          <div class="table-wrap">
           <DataTable :value="result.items" size="small">
             <Column style="width: 80px">
               <template #body="{ data }">
@@ -88,7 +89,7 @@
                 </RouterLink>
               </template>
             </Column>
-            <Column :header="t('product.weight')">
+            <Column :header="t('product.weight')" header-class="col-weight" body-class="col-weight">
               <template #body="{ data }">{{ data.weight }} oz t</template>
             </Column>
             <Column :header="t('cart.quantity')" field="quantity" />
@@ -101,6 +102,7 @@
               </template>
             </Column>
           </DataTable>
+          </div>
 
           <div class="price-summary">
             <div class="price-row">
@@ -303,6 +305,21 @@ function formatDate(iso: string) {
   .search-btn :deep(.p-button-icon) {
     margin: 0;
   }
+  .container {
+    padding: 1rem 0.75rem;
+  }
+  .query-card {
+    padding: 1.25rem 1rem;
+    border-radius: 10px;
+  }
+  :deep(.col-weight) {
+    display: none;
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .history-section {

@@ -18,7 +18,7 @@ export default {
     preOrder: '預購',
     stockQty: '庫存數量',
     expectedArrival: '預計到貨',
-    insufficientStock: '庫存不足',
+    insufficientStock: '補貨中',
   },
   cart: {
     title: '購物車',

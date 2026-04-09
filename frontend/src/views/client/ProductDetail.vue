@@ -24,8 +24,8 @@
             class="product-image"
             @error="(e: any) => { e.target.src = '/placeholder.svg' }"
           />
-          <span class="type-badge" :class="product.product_type === 'pre_order' ? 'pre-order' : 'in-stock'">
-            {{ product.product_type === 'pre_order' ? t('product.preOrder') : t('product.inStock') }}
+          <span class="type-badge" :class="product.product_type === 'pre_order' ? 'pre-order' : (product.stock_qty === 0 ? 'restocking' : 'in-stock')">
+            {{ product.product_type === 'pre_order' ? t('product.preOrder') : (product.stock_qty === 0 ? t('product.insufficientStock') : t('product.inStock')) }}
           </span>
           <div v-if="allImages.length > 1" class="thumb-strip">
             <img
@@ -260,8 +260,9 @@ function addToCart() {
   pointer-events: none;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-.type-badge.in-stock { background: #27ae60; color: white; }
-.type-badge.pre-order { background: #2980b9; color: white; }
+.type-badge.in-stock   { background: #27ae60; color: white; }
+.type-badge.pre-order  { background: #2980b9; color: white; }
+.type-badge.restocking { background: #f87171; color: white; }
 
 .stock-zero { color: #e74c3c; font-weight: 700; }
 
