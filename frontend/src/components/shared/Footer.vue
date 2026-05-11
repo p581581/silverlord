@@ -15,11 +15,11 @@
             </li>
             <li>
               <i class="pi pi-envelope footer-icon" />
-              <span>暫無</span>
+              <span>service@silverlord.com.tw</span>
             </li>
             <li>
               <i class="pi pi-map-marker footer-icon" />
-              <span>台中市南屯區楓樹六街168號5F-2</span>
+              <span>暫無</span>
             </li>
           </ul>
         </div>
@@ -30,10 +30,7 @@
             <i class="pi pi-credit-card" /> 匯款資訊
           </h3>
           <div class="bank-card">
-            <div class="bank-row"><span class="bank-label">銀行名稱</span><span>土地銀行（005）</span></div>
-            <div class="bank-row"><span class="bank-label">分行名稱</span><span>中港分行</span></div>
-            <div class="bank-row"><span class="bank-label">戶　　名</span><span>吳仲凱</span></div>
-            <div class="bank-account">094005550186</div>
+            <span class="bank-notice">下單後將於訂單郵件提供</span>
           </div>
         </div>
 
@@ -160,6 +157,12 @@ const year = new Date().getFullYear()
   color: #64748b;
   width: 4.5rem;
   flex-shrink: 0;
+}
+
+.bank-notice {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  line-height: 1.6;
 }
 
 .bank-account {

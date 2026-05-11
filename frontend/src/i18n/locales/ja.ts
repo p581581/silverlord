@@ -19,6 +19,7 @@ export default {
     stockQty: '在庫数',
     expectedArrival: '入荷予定日',
     insufficientStock: '入荷中',
+    cartFull: '在庫上限に達しました',
   },
   cart: {
     title: 'ショッピングカート',

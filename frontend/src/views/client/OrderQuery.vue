@@ -71,37 +71,37 @@
 
           <h3 class="items-title">{{ t('orderQuery.items') }}</h3>
           <div class="table-wrap">
-          <DataTable :value="result.items" size="small">
-            <Column style="width: 80px">
-              <template #body="{ data }">
-                <RouterLink :to="`/products/${data.product_id}`">
-                  <img
-                    :src="resolveImage(data.image_url)"
-                    class="item-thumb"
-                    :alt="data.product_name" />
-                </RouterLink>
-              </template>
-            </Column>
-            <Column :header="t('admin.name')">
-              <template #body="{ data }">
-                <RouterLink :to="`/products/${data.product_id}`" class="product-link">
-                  {{ data.product_name }}
-                </RouterLink>
-              </template>
-            </Column>
-            <Column :header="t('product.weight')" header-class="col-weight" body-class="col-weight">
-              <template #body="{ data }">{{ data.weight }} oz t</template>
-            </Column>
-            <Column :header="t('cart.quantity')" field="quantity" />
-            <Column :header="t('cart.unitPrice')">
-              <template #body="{ data }">NT$ {{ data.locked_unit_price.toLocaleString() }}</template>
-            </Column>
-            <Column :header="t('cart.subtotal')">
-              <template #body="{ data }">
-                NT$ {{ (data.locked_unit_price * data.quantity).toLocaleString() }}
-              </template>
-            </Column>
-          </DataTable>
+            <DataTable :value="result.items" size="small">
+              <Column style="width: 80px">
+                <template #body="{ data }">
+                  <RouterLink :to="`/products/${data.product_id}`">
+                    <img
+                      :src="resolveImage(data.image_url)"
+                      class="item-thumb"
+                      :alt="data.product_name" />
+                  </RouterLink>
+                </template>
+              </Column>
+              <Column :header="t('admin.name')">
+                <template #body="{ data }">
+                  <RouterLink :to="`/products/${data.product_id}`" class="product-link">
+                    {{ data.product_name }}
+                  </RouterLink>
+                </template>
+              </Column>
+              <Column :header="t('product.weight')" header-class="col-weight" body-class="col-weight">
+                <template #body="{ data }">{{ data.weight }} oz t</template>
+              </Column>
+              <Column :header="t('cart.quantity')" field="quantity" />
+              <Column :header="t('cart.unitPrice')">
+                <template #body="{ data }">NT$ {{ data.locked_unit_price.toLocaleString() }}</template>
+              </Column>
+              <Column :header="t('cart.subtotal')">
+                <template #body="{ data }">
+                  NT$ {{ (data.locked_unit_price * data.quantity).toLocaleString() }}
+                </template>
+              </Column>
+            </DataTable>
           </div>
 
           <div class="price-summary">
@@ -112,7 +112,7 @@
             <div class="price-row">
               <span>{{ t('checkout.shipFee') }}</span>
               <span>{{ result.ship_fee > 0 ? 'NT$ ' + result.ship_fee.toLocaleString() : t('checkout.shipFreeText')
-              }}</span>
+                }}</span>
             </div>
             <div class="price-row total-row">
               <span>{{ t('checkout.grandTotal') }}</span>
@@ -126,7 +126,7 @@
               <i class="pi pi-send" />
               {{ t('payment.title') }}
             </div>
-            <p class="remit-hint">請於 30 分鐘內完成匯款，並輸入末五碼通知我們確認。</p>
+            <p class="remit-hint">請於 48 小時內完成匯款，並輸入末五碼通知我們確認。</p>
             <div v-if="!remitSuccess" class="remit-form">
               <InputMask v-model="remitInfo" mask="99999" :placeholder="t('payment.remitPlaceholder')"
                 class="remit-input" />
@@ -302,16 +302,20 @@ function formatDate(iso: string) {
   .search-btn :deep(.p-button-label) {
     display: none;
   }
+
   .search-btn :deep(.p-button-icon) {
     margin: 0;
   }
+
   .container {
     padding: 1rem 0.75rem;
   }
+
   .query-card {
     padding: 1.25rem 1rem;
     border-radius: 10px;
   }
+
   :deep(.col-weight) {
     display: none;
   }

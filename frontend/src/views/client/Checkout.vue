@@ -188,7 +188,7 @@ const submitting = ref(false)
 const email = ref('')
 const name = ref('')
 const phone = ref('')
-const shipMethod = ref<'mail' | '711' | 'pickup' | ''>('')
+const shipMethod = ref<'mail' | '711' | 'pickup' | ''>('pickup')
 const shipAddress = ref('')
 const shipStore = ref('')
 const shipFees = ref<{ mail: number; '711': number; pickup: number }>({ mail: 0, '711': 0, pickup: 0 })
@@ -203,6 +203,10 @@ const currentShipFee = computed(() =>
 const grandTotal = computed(() => cartStore.total + currentShipFee.value)
 
 onMounted(async () => {
+  if (cartStore.items.length === 0) {
+    router.replace('/')
+    return
+  }
   cartStore.startCheckoutTimer()
   try {
     const res = await api.get('/api/v1/ship-fees')

@@ -54,6 +54,7 @@ func main() {
 	v1.GET("/products/:id", handlers.GetProduct)
 	v1.GET("/spot-price", handlers.GetSpotPrice)
 	v1.GET("/ship-fees", handlers.GetShipFees)
+	v1.GET("/bank-info", handlers.GetBankInfo)
 	v1.POST("/checkout", handlers.Checkout(cfg))
 	v1.POST("/report-payment", handlers.ReportPayment)
 	v1.POST("/orders/:order_no/resend-email", handlers.ResendEmail(cfg))

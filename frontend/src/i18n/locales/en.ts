@@ -19,6 +19,7 @@ export default {
     stockQty: 'Stock Qty',
     expectedArrival: 'Est. Arrival',
     insufficientStock: 'Restocking',
+    cartFull: 'Max qty reached',
   },
   cart: {
     title: 'Cart',

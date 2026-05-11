@@ -22,10 +22,11 @@
             :src="resolveImage(allImages[activeImg])"
             :alt="product.name"
             class="product-image"
-            @error="(e: any) => { e.target.src = '/placeholder.svg' }"
-          />
-          <span class="type-badge" :class="product.product_type === 'pre_order' ? 'pre-order' : (product.stock_qty === 0 ? 'restocking' : 'in-stock')">
-            {{ product.product_type === 'pre_order' ? t('product.preOrder') : (product.stock_qty === 0 ? t('product.insufficientStock') : t('product.inStock')) }}
+            @error="(e: any) => { e.target.src = '/placeholder.svg' }" />
+          <span class="type-badge"
+            :class="product.product_type === 'pre_order' ? 'pre-order' : (product.stock_qty === 0 ? 'restocking' : 'in-stock')">
+            {{ product.product_type === 'pre_order' ? t('product.preOrder') : (product.stock_qty === 0 ?
+              t('product.insufficientStock') : t('product.inStock')) }}
           </span>
           <div v-if="allImages.length > 1" class="thumb-strip">
             <img
@@ -34,8 +35,7 @@
               :src="resolveImage(img)"
               class="thumb-dot"
               :class="{ active: activeImg === i }"
-              @click="activeImg = i"
-            />
+              @click="activeImg = i" />
           </div>
         </div>
 
@@ -74,11 +74,11 @@
           </div>
 
           <Button
-            :label="t('product.addToCart')"
             icon="pi pi-shopping-cart"
             size="large"
             class="w-full mt-4"
-            :disabled="product.product_type === 'in_stock' && product.stock_qty === 0"
+            :disabled="(product.product_type === 'in_stock' && product.stock_qty === 0) || isCartFull"
+            :label="isCartFull ? t('product.cartFull') : t('product.addToCart')"
             @click="addToCart" />
         </div>
       </div>
@@ -128,6 +128,13 @@ const allImages = computed(() => {
 
 const countdownPercent = computed(() => (priceStore.countdown / 60) * 100)
 
+const cartQty = computed(() => cartStore.items.find(i => i.product_id === product.value?.id)?.quantity ?? 0)
+const isCartFull = computed(() =>
+  !!product.value &&
+  product.value.product_type === 'in_stock' &&
+  cartQty.value >= product.value.stock_qty
+)
+
 watch(() => product.value?.price, () => {
   flashing.value = true
   setTimeout(() => (flashing.value = false), 800)
@@ -161,7 +168,7 @@ onUnmounted(() => {
 })
 
 function addToCart() {
-  if (!product.value) return
+  if (!product.value || isCartFull.value) return
   cartStore.addItem({
     product_id: product.value.id,
     product_name: product.value.name,
@@ -230,7 +237,7 @@ function addToCart() {
   transform: translateX(-50%);
   display: flex;
   gap: 6px;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   border-radius: 8px;
   padding: 5px 8px;
 }
@@ -246,8 +253,14 @@ function addToCart() {
   transition: opacity 0.15s, border-color 0.15s;
 }
 
-.thumb-dot:hover { opacity: 0.85; }
-.thumb-dot.active { opacity: 1; border-color: white; }
+.thumb-dot:hover {
+  opacity: 0.85;
+}
+
+.thumb-dot.active {
+  opacity: 1;
+  border-color: white;
+}
 
 .type-badge {
   position: absolute;
@@ -258,13 +271,28 @@ function addToCart() {
   padding: 5px 14px;
   border-radius: 20px;
   pointer-events: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-.type-badge.in-stock   { background: #27ae60; color: white; }
-.type-badge.pre-order  { background: #2980b9; color: white; }
-.type-badge.restocking { background: #f87171; color: white; }
 
-.stock-zero { color: #e74c3c; font-weight: 700; }
+.type-badge.in-stock {
+  background: #27ae60;
+  color: white;
+}
+
+.type-badge.pre-order {
+  background: #2980b9;
+  color: white;
+}
+
+.type-badge.restocking {
+  background: #f87171;
+  color: white;
+}
+
+.stock-zero {
+  color: #e74c3c;
+  font-weight: 700;
+}
 
 .info-panel {
   padding: 2rem;

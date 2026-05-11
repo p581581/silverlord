@@ -28,8 +28,11 @@ export const useCartStore = defineStore('cart', () => {
   function addItem(item: CartItem) {
     const existing = items.value.find((i) => i.product_id === item.product_id)
     if (existing) {
-      existing.quantity += item.quantity
+      const newQty = existing.quantity + item.quantity
+      const cap = item.stock_qty ?? existing.stock_qty
+      existing.quantity = cap != null ? Math.min(newQty, cap) : newQty
       existing.unit_price = item.unit_price // 更新最新報價
+      existing.stock_qty = item.stock_qty   // 更新最新庫存上限
     } else {
       items.value.push({ ...item })
     }

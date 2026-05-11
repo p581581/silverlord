@@ -1,5 +1,7 @@
 import axios from 'axios'
 import { i18n } from '@/i18n'
+import { useAuthStore } from '@/stores/auth'
+import router from '@/router'
 
 const api = axios.create({
   baseURL: import.meta.env.BASE_URL,
@@ -24,6 +26,13 @@ api.interceptors.response.use(
       message = t('errors.NETWORK_ERROR')
     } else {
       const code: string = error.response.data?.code
+
+      // Token 過期或無效 → 自動登出並跳回登入頁
+      if (code === 'AUTH_INVALID_TOKEN' || code === 'AUTH_MISSING_TOKEN') {
+        useAuthStore().logout()
+        router.push('/admin/login')
+      }
+
       message = code && t(`errors.${code}`) !== `errors.${code}`
         ? t(`errors.${code}`)
         : error.response.data?.message || t('errors.INTERNAL_ERROR')

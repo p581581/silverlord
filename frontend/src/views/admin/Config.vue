@@ -51,6 +51,31 @@
 
     <div class="section-card">
       <h2 class="section-title">
+        <i class="pi pi-building-columns" /> 匯款資訊
+      </h2>
+      <div class="field-row">
+        <div class="field">
+          <label>銀行名稱</label>
+          <InputText v-model="form.bank_name" class="w-full" placeholder="玉山銀行（808）" />
+        </div>
+        <div class="field">
+          <label>戶名</label>
+          <InputText v-model="form.bank_account_name" class="w-full" placeholder="王小明" />
+        </div>
+      </div>
+      <div class="field">
+        <label>帳號</label>
+        <InputText v-model="form.bank_account" class="w-full" placeholder="0123456789012" />
+      </div>
+      <Button
+        :label="t('admin.save')"
+        icon="pi pi-save"
+        :loading="saving"
+        @click="saveConfig" />
+    </div>
+
+    <div class="section-card">
+      <h2 class="section-title">
         <i class="pi pi-info-circle" /> 系統資訊
       </h2>
       <div class="info-grid">
@@ -87,6 +112,9 @@ const form = ref({
   tg_chat_ids: '',
   manual_offset: 0,
   manual_ex_rate: 0,
+  bank_name: '',
+  bank_account: '',
+  bank_account_name: '',
 })
 // 將逗號分隔字串拆成陣列供 UI 編輯
 const chatIds = ref<string[]>([''])
@@ -105,10 +133,17 @@ onMounted(async () => {
 
 async function saveConfig() {
   saving.value = true
-  // 合回逗號分隔字串，過濾空值
   form.value.tg_chat_ids = chatIds.value.filter(id => id.trim() !== '').join(',')
   try {
-    await api.put('/api/admin/config', form.value)
+    const { data: current } = await api.get('/api/admin/config')
+    await api.put('/api/admin/config', {
+      ...current,
+      tg_bot_token: form.value.tg_bot_token,
+      tg_chat_ids: form.value.tg_chat_ids,
+      bank_name: form.value.bank_name,
+      bank_account: form.value.bank_account,
+      bank_account_name: form.value.bank_account_name,
+    })
     toast.add({ severity: 'success', summary: t('admin.save'), detail: 'OK', life: 2000 })
   } catch (err: any) {
     toast.add({ severity: 'error', summary: 'Error', detail: err.userMessage, life: 3000 })

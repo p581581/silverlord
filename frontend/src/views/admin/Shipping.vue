@@ -193,6 +193,9 @@ async function save() {
 .fee-number {
   width: 100px;
 }
+.fee-number :deep(.p-inputnumber-input) {
+  width: 100%;
+}
 
 .fee-hint {
   font-size: 0.85rem;

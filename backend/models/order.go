@@ -14,7 +14,7 @@ type Order struct {
 	ShipStore       string    `json:"ship_store"`                            // 7-11 店名
 	ShipFee         int       `xorm:"default 0" json:"ship_fee"`             // 實際收取運費（TWD）
 	RemitInfo       string    `json:"remit_info"`                            // 匯款末五碼
-	Status          int       `xorm:"default 0" json:"status"`              // 0:待匯款 1:已通知 2:已確認/出貨
+	Status          int       `xorm:"default 0" json:"status"`              // 0:待匯款 1:已通知 2:已確認/待出貨
 	CreatedAt       time.Time `xorm:"created" json:"created_at"`
 }
 

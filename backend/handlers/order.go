@@ -14,6 +14,7 @@ import (
 	"silverlord/backend/services"
 
 	"github.com/labstack/echo/v4"
+	"xorm.io/xorm"
 )
 
 type cartItem struct {
@@ -130,8 +131,13 @@ func Checkout(appCfg *config.Config) echo.HandlerFunc {
 		}
 		total += shipFee
 
+		orderNo, err := generateOrderNo(sess)
+		if err != nil {
+			sess.Rollback()
+			return errInternal(c, "generate order no failed")
+		}
 		order := &models.Order{
-			OrderNo:          generateOrderNo(),
+			OrderNo:          orderNo,
 			TotalLockedPrice: total,
 			Email:            req.Email,
 			Name:             req.Name,
@@ -162,10 +168,19 @@ func Checkout(appCfg *config.Config) echo.HandlerFunc {
 		// Email 確認信（非同步，使用 appCfg 的 SMTP 設定）
 		if req.Email != "" {
 			go func() {
+				paymentURL := ""
+				if appCfg.SiteURL != "" {
+					paymentURL = fmt.Sprintf("%s/payment?order_no=%s", appCfg.SiteURL, order.OrderNo)
+				}
 				if err := services.SendOrderConfirmEmail(appCfg, req.Email, services.OrderEmailData{
 					OrderNo:          order.OrderNo,
 					TotalLockedPrice: order.TotalLockedPrice,
+					ShipFee:          order.ShipFee,
 					Items:            orderItems,
+					PaymentURL:       paymentURL,
+					BankName:         dbCfg.BankName,
+					BankAccount:      dbCfg.BankAccount,
+					BankAccountName:  dbCfg.BankAccountName,
 				}); err != nil {
 					log.Printf("[email] send failed: %v", err)
 				}
@@ -205,11 +220,22 @@ func ResendEmail(appCfg *config.Config) echo.HandlerFunc {
 		}
 		var items []models.OrderItem
 		database.DB.Where("order_id = ?", order.Id).Find(&items)
+		var dbCfg models.SystemConfig
+		database.DB.ID(1).Get(&dbCfg)
 		go func() {
+			paymentURL := ""
+			if appCfg.SiteURL != "" {
+				paymentURL = fmt.Sprintf("%s/payment?order_no=%s", appCfg.SiteURL, order.OrderNo)
+			}
 			if err := services.SendOrderConfirmEmail(appCfg, order.Email, services.OrderEmailData{
 				OrderNo:          order.OrderNo,
 				TotalLockedPrice: order.TotalLockedPrice,
+				ShipFee:          order.ShipFee,
 				Items:            items,
+				PaymentURL:       paymentURL,
+				BankName:         dbCfg.BankName,
+				BankAccount:      dbCfg.BankAccount,
+				BankAccountName:  dbCfg.BankAccountName,
 			}); err != nil {
 				log.Printf("[email] resend failed: %v", err)
 			}
@@ -293,9 +319,25 @@ func ReportPayment(c echo.Context) error {
 }
 
 // generateOrderNo 產生 SN + YYYYMMDD + 4位流水號
-func generateOrderNo() string {
+// 在 transaction 內執行，用 advisory lock 防止並發衝突，用 MAX 取代 COUNT 避免刪單後重複
+func generateOrderNo(sess *xorm.Session) (string, error) {
+	// 交易級 advisory lock，commit/rollback 後自動釋放
+	if _, err := sess.Exec("SELECT pg_advisory_xact_lock(202604140001)"); err != nil {
+		return "", err
+	}
 	today := time.Now().Format("20060102")
-	prefix := "SN" + today + "%"
-	count, _ := database.DB.Where("order_no LIKE ?", prefix).Count(new(models.Order))
-	return fmt.Sprintf("SN%s%04d", today, count+1)
+	prefix := "SN" + today
+	rows, err := sess.QueryString(`SELECT COALESCE(MAX(order_no), '') AS max_no FROM "order" WHERE order_no LIKE ?`, prefix+"%")
+	if err != nil {
+		return "", err
+	}
+	seq := 1
+	if len(rows) > 0 {
+		maxNo := rows[0]["max_no"]
+		if len(maxNo) == len(prefix)+4 {
+			fmt.Sscanf(maxNo[len(prefix):], "%d", &seq)
+			seq++
+		}
+	}
+	return fmt.Sprintf("SN%s%04d", today, seq), nil
 }

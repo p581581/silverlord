@@ -23,6 +23,8 @@ type Config struct {
 	SmtpUser     string
 	SmtpPassword string
 	SmtpFrom     string
+	SmtpFromName string
+	SiteURL      string
 }
 
 func Load() *Config {
@@ -44,6 +46,8 @@ func Load() *Config {
 		SmtpUser:     getEnv("SMTP_USER", ""),
 		SmtpPassword: getEnv("SMTP_PASSWORD", ""),
 		SmtpFrom:     getEnv("SMTP_FROM", ""),
+		SmtpFromName: getEnv("SMTP_FROM_NAME", ""),
+		SiteURL:      getEnv("SITE_URL", ""),
 	}
 }
 

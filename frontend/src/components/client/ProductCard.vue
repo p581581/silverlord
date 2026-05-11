@@ -38,15 +38,15 @@
       </div>
 
       <!-- 數量 + 加入購物車 -->
-      <div class="cart-row" :class="{ disabled: isSoldOut }">
+      <div class="cart-row" :class="{ disabled: isSoldOut || isCartFull }">
         <QtyInput
           v-model="qty"
-          :max="product.product_type === 'in_stock' ? product.stock_qty : undefined"
-          :disabled="isSoldOut"
+          :max="product.product_type === 'in_stock' ? remaining : undefined"
+          :disabled="isSoldOut || isCartFull"
         />
-        <button class="add-btn" :disabled="isSoldOut" @click.prevent="addToCart">
+        <button class="add-btn" :disabled="isSoldOut || isCartFull" @click.prevent="addToCart">
           <i class="pi pi-shopping-cart" />
-          {{ t('product.addToCart') }}
+          {{ isCartFull ? t('product.cartFull') : t('product.addToCart') }}
         </button>
       </div>
 
@@ -95,6 +95,12 @@ const flashing = ref(false)
 const countdownPercent = computed(() => (priceStore.countdown / 60) * 100)
 const isSoldOut = computed(() => props.product.product_type === 'in_stock' && props.product.stock_qty === 0)
 
+const cartQty = computed(() => cartStore.items.find(i => i.product_id === props.product.id)?.quantity ?? 0)
+const remaining = computed(() =>
+  props.product.product_type === 'in_stock' ? props.product.stock_qty - cartQty.value : Infinity
+)
+const isCartFull = computed(() => props.product.product_type === 'in_stock' && remaining.value <= 0)
+
 watch(
   () => props.product.price,
   () => {
@@ -114,16 +120,17 @@ watch(
 )
 
 function addToCart() {
-  if (isSoldOut.value) return
+  if (isSoldOut.value || isCartFull.value) return
+  const addQty = isFinite(remaining.value) ? Math.min(qty.value, remaining.value) : qty.value
   cartStore.addItem({
     product_id: props.product.id,
     product_name: props.product.name,
-    quantity: qty.value,
+    quantity: addQty,
     unit_price: props.product.price,
     image_url: props.product.image_url,
     stock_qty: props.product.product_type === 'in_stock' ? props.product.stock_qty : undefined,
   })
-  toast.add({ severity: 'success', summary: props.product.name, detail: `× ${qty.value} ${t('product.addToCart')}`, life: 2000 })
+  toast.add({ severity: 'success', summary: props.product.name, detail: `× ${addQty} ${t('product.addToCart')}`, life: 2000 })
   qty.value = 1
 }
 </script>

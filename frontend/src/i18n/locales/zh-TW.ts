@@ -19,6 +19,7 @@ export default {
     stockQty: '庫存數量',
     expectedArrival: '預計到貨',
     insufficientStock: '補貨中',
+    cartFull: '已達庫存上限',
   },
   cart: {
     title: '購物車',
@@ -38,7 +39,7 @@ export default {
     confirm: '確認下單',
     success: '訂單建立成功',
     orderNo: '訂單編號',
-    hint: '請於 30 分鐘內完成匯款',
+    hint: '請於 48 小時內完成匯款',
     emailInvalid: '請輸入有效的 Email',
     name: '收件人姓名',
     phone: '聯絡電話',
@@ -119,7 +120,7 @@ export default {
     statusList: {
       0: '待匯款',
       1: '已通知',
-      2: '已確認/出貨',
+      2: '已確認/待出貨',
       3: '不成立',
       4: '異常',
       5: '已完成',

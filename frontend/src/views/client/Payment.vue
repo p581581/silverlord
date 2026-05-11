@@ -56,10 +56,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useScrollTop } from '@/composables/useScrollTop'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import InputText from 'primevue/inputtext'
 import InputMask from 'primevue/inputmask'
@@ -70,12 +70,20 @@ import api from '@/api'
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const { showScrollTop, scrollToTop } = useScrollTop()
 const toast = useToast()
 
 const form = ref({ orderNo: '', remitInfo: '' })
 const submitting = ref(false)
 const success = ref(false)
+
+onMounted(() => {
+  const orderNo = route.query.order_no
+  if (typeof orderNo === 'string' && orderNo) {
+    form.value.orderNo = orderNo
+  }
+})
 
 async function submit() {
   submitting.value = true

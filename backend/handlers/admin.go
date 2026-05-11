@@ -223,7 +223,7 @@ func AdminUpdateOrderStatus(c echo.Context) error {
 	if req.Status == 3 && order.Status == 5 {
 		return errBadRequest(c, ErrOrderInvalidStatus, "completed orders cannot be invalidated")
 	}
-	// 已完成（5）只能從已確認/出貨（2）設定
+	// 已完成（5）只能從已確認/待出貨（2）設定
 	if req.Status == 5 && order.Status != 2 {
 		return errBadRequest(c, ErrOrderInvalidStatus, "order must be confirmed before marking as completed")
 	}
@@ -278,6 +278,17 @@ func GetShipFees(c echo.Context) error {
 		"mail":   cfg.ShipFeeMail,
 		"711":    cfg.ShipFee711,
 		"pickup": cfg.ShipFeePickup,
+	})
+}
+
+// GET /api/v1/bank-info
+func GetBankInfo(c echo.Context) error {
+	var cfg models.SystemConfig
+	database.DB.ID(1).Get(&cfg)
+	return c.JSON(http.StatusOK, echo.Map{
+		"bank_name":         cfg.BankName,
+		"bank_account":      cfg.BankAccount,
+		"bank_account_name": cfg.BankAccountName,
 	})
 }
 

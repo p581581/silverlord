@@ -159,7 +159,7 @@ func botHelpMsg() string {
 <b>狀態查詢（預設今日）</b>
 /orders 0 — ⏳ 待匯款
 /orders 1 — 💰 已通知
-/orders 2 — 📦 已確認/出貨
+/orders 2 — 📦 已確認/待出貨
 /orders 3 — ❌ 不成立
 /orders 4 — ⚠️ 異常
 /orders 5 — ✅ 已完成
@@ -175,7 +175,7 @@ func botStatusLabel(status int) string {
 	case 1:
 		return "💰 已通知"
 	case 2:
-		return "📦 已確認/出貨"
+		return "📦 已確認/待出貨"
 	case 3:
 		return "❌ 不成立"
 	case 4:
