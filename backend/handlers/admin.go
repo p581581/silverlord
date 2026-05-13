@@ -292,6 +292,16 @@ func GetBankInfo(c echo.Context) error {
 	})
 }
 
+// GET /api/v1/site-config（公開）
+func GetSiteConfig(c echo.Context) error {
+	var cfg models.SystemConfig
+	database.DB.ID(1).Get(&cfg)
+	return c.JSON(http.StatusOK, echo.Map{
+		"banner_url":        cfg.BannerUrl,
+		"banner_custom_url": cfg.BannerCustomUrl,
+	})
+}
+
 // GET /api/admin/config
 func AdminGetConfig(c echo.Context) error {
 	var cfg models.SystemConfig

@@ -3,7 +3,7 @@
     <Navbar />
 
     <!-- Hero Banner -->
-    <section class="hero">
+    <section class="hero" :style="heroBgStyle">
       <div class="hero-overlay" />
       <div class="hero-content">
         <p class="hero-sub">您的專屬實體白銀金庫</p>
@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useScrollTop } from '@/composables/useScrollTop'
 import { useI18n } from 'vue-i18n'
 import ProgressSpinner from 'primevue/progressspinner'
@@ -93,12 +93,17 @@ import ProductCard from '@/components/client/ProductCard.vue'
 import { usePriceStore } from '@/stores/price'
 import { useCartStore } from '@/stores/cart'
 import api from '@/api'
+import { resolveImage } from '@/api/image'
 
 const { t } = useI18n()
 const priceStore = usePriceStore()
 const cartStore = useCartStore()
 
 const { showScrollTop, scrollToTop } = useScrollTop()
+
+const FALLBACK_BANNER = 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&q=80&w=1920&sat=-100'
+const bannerUrl = ref(FALLBACK_BANNER)
+const heroBgStyle = computed(() => ({ backgroundImage: `url('${bannerUrl.value}')` }))
 
 const products = ref<any[]>([])
 const loading = ref(false)
@@ -126,10 +131,17 @@ function scrollToProducts() {
 
 let productTimer: ReturnType<typeof setInterval>
 
-onMounted(() => {
+onMounted(async () => {
   priceStore.startAutoRefresh()
   fetchProducts()
   productTimer = setInterval(fetchProducts, 60_000)
+  try {
+    const res = await api.get('/api/v1/site-config')
+    const { banner_url, banner_custom_url } = res.data
+    if (banner_url) bannerUrl.value = resolveImage(banner_url)
+    else if (banner_custom_url) bannerUrl.value = banner_custom_url
+    // else: 維持預設 FALLBACK_BANNER
+  } catch { }
 })
 
 onUnmounted(() => {
@@ -150,7 +162,6 @@ onUnmounted(() => {
 /* ── Hero ── */
 .hero {
   position: relative;
-  background-image: url('https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&q=80&w=1920&sat=-100');
   background-size: cover;
   background-position: center;
   min-height: 520px;

@@ -9,7 +9,9 @@ type SystemConfig struct {
 	ShipFeeMail    int     `xorm:"default 0" json:"ship_fee_mail"`    // 郵寄運費（TWD）
 	ShipFee711     int     `xorm:"default 0" json:"ship_fee_711"`     // 7-11 店到店運費（TWD）
 	ShipFeePickup  int     `xorm:"default 0" json:"ship_fee_pickup"`  // 自取運費（TWD）
-	BankName       string  `json:"bank_name"`                         // 銀行名稱
-	BankAccount    string  `json:"bank_account"`                      // 帳號
-	BankAccountName string `json:"bank_account_name"`                 // 戶名
+	BankName        string `json:"bank_name"`         // 銀行名稱
+	BankAccount     string `json:"bank_account"`      // 帳號
+	BankAccountName string `json:"bank_account_name"` // 戶名
+	BannerUrl       string `json:"banner_url"`        // 首頁 Banner（上傳圖片）
+	BannerCustomUrl string `json:"banner_custom_url"` // 首頁 Banner（自訂 URL）
 }

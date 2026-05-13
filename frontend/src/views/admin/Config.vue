@@ -74,6 +74,96 @@
         @click="saveConfig" />
     </div>
 
+    <!-- Banner 上傳 -->
+    <div class="section-card">
+      <h2 class="section-title">
+        <i class="pi pi-image" /> 首頁 Banner
+      </h2>
+      <!-- 預覽：按優先順序顯示 -->
+      <div class="banner-preview-wrap">
+        <img
+          v-if="form.banner_url || form.banner_custom_url"
+          :src="resolveImage(form.banner_url || form.banner_custom_url)"
+          class="banner-preview"
+          alt="banner"
+        />
+        <div v-else class="banner-empty">
+          <i class="pi pi-image" />
+          <span>預設 Banner（Unsplash）</span>
+        </div>
+      </div>
+
+      <!-- 優先順序說明 -->
+      <div class="banner-priority">
+        <span :class="['priority-tag', form.banner_url ? 'active' : '']">① 上傳圖片</span>
+        <i class="pi pi-angle-right" />
+        <span :class="['priority-tag', !form.banner_url && form.banner_custom_url ? 'active' : '']">② 自訂 URL</span>
+        <i class="pi pi-angle-right" />
+        <span :class="['priority-tag', !form.banner_url && !form.banner_custom_url ? 'active' : '']">③ 預設</span>
+      </div>
+
+      <!-- 上傳區 -->
+      <div class="field" style="margin-top: 1rem">
+        <label>① 上傳圖片 <span class="optional">（優先顯示）</span></label>
+        <div class="action-row">
+          <FileUpload
+            mode="basic"
+            accept="image/*"
+            :max-file-size="10000000"
+            :auto="true"
+            :custom-upload="true"
+            choose-label="上傳 Banner"
+            @uploader="onBannerUpload"
+          />
+          <Button
+            v-if="form.banner_url"
+            label="移除上傳圖片"
+            icon="pi pi-trash"
+            severity="danger"
+            outlined
+            size="small"
+            :loading="saving"
+            @click="removeBanner"
+          />
+        </div>
+        <small v-if="form.banner_url" class="hint">目前：{{ form.banner_url }}</small>
+      </div>
+
+      <!-- 自訂 URL 區 -->
+      <div class="field">
+        <label>② 自訂 URL <span class="optional">（無上傳圖片時使用）</span></label>
+        <InputText v-model="form.banner_custom_url" class="w-full" placeholder="https://example.com/banner.jpg" />
+      </div>
+      <Button
+        :label="t('admin.save')"
+        icon="pi pi-save"
+        :loading="saving"
+        @click="saveConfig"
+      />
+
+      <!-- 裁切 Dialog -->
+      <Dialog
+        v-model:visible="bannerCropVisible"
+        header="框選 Banner 範圍"
+        :style="{ width: '760px' }"
+        modal
+        :draggable="false"
+      >
+        <div class="banner-crop-wrap">
+          <Cropper
+            ref="bannerCropperRef"
+            :src="bannerCropSrc"
+            :stencil-props="{ aspectRatio: 16 / 9 }"
+            class="cropper"
+          />
+        </div>
+        <template #footer>
+          <Button label="取消" severity="secondary" outlined @click="bannerCropVisible = false" />
+          <Button label="確認裁切" icon="pi pi-check" :loading="bannerCropUploading" @click="confirmBannerCrop" />
+        </template>
+      </Dialog>
+    </div>
+
     <div class="section-card">
       <h2 class="section-title">
         <i class="pi pi-info-circle" /> 系統資訊
@@ -102,7 +192,12 @@ import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import FileUpload from 'primevue/fileupload'
+import { Cropper } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css'
 import api from '@/api'
+import { resolveImage } from '@/api/image'
 
 const { t } = useI18n()
 const toast = useToast()
@@ -115,6 +210,8 @@ const form = ref({
   bank_name: '',
   bank_account: '',
   bank_account_name: '',
+  banner_url: '',
+  banner_custom_url: '',
 })
 // 將逗號分隔字串拆成陣列供 UI 編輯
 const chatIds = ref<string[]>([''])
@@ -143,6 +240,8 @@ async function saveConfig() {
       bank_name: form.value.bank_name,
       bank_account: form.value.bank_account,
       bank_account_name: form.value.bank_account_name,
+      banner_url: form.value.banner_url,
+      banner_custom_url: form.value.banner_custom_url,
     })
     toast.add({ severity: 'success', summary: t('admin.save'), detail: 'OK', life: 2000 })
   } catch (err: any) {
@@ -150,6 +249,51 @@ async function saveConfig() {
   } finally {
     saving.value = false
   }
+}
+
+// ── Banner 裁切上傳 ───────────────────────────────────────
+const bannerCropVisible = ref(false)
+const bannerCropSrc = ref('')
+const bannerCropperRef = ref<any>(null)
+const bannerCropUploading = ref(false)
+let bannerPendingFileName = 'banner.jpg'
+
+function onBannerUpload(event: any) {
+  const file = event.files[0]
+  bannerPendingFileName = file.name
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    bannerCropSrc.value = e.target?.result as string
+    bannerCropVisible.value = true
+  }
+  reader.readAsDataURL(file)
+}
+
+async function confirmBannerCrop() {
+  bannerCropUploading.value = true
+  try {
+    const { canvas } = bannerCropperRef.value.getResult()
+    canvas.toBlob(async (blob: Blob | null) => {
+      if (!blob) return
+      const fd = new FormData()
+      fd.append('file', blob, bannerPendingFileName)
+      const res = await api.post('/api/admin/upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      form.value.banner_url = res.data.url
+      await saveConfig()
+      bannerCropVisible.value = false
+      bannerCropUploading.value = false
+    }, 'image/jpeg', 0.92)
+  } catch (err: any) {
+    toast.add({ severity: 'error', summary: 'Error', detail: err.userMessage, life: 3000 })
+    bannerCropUploading.value = false
+  }
+}
+
+async function removeBanner() {
+  form.value.banner_url = ''
+  await saveConfig()
 }
 
 async function testTelegram() {
@@ -250,6 +394,60 @@ async function testTelegram() {
 
 .field-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0; }
 .field-row .field { flex: 1; min-width: 160px; }
+
+.banner-preview-wrap {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f0f0f0;
+  border: 2px dashed #e0e0e0;
+}
+.banner-preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+.banner-empty {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #bbb;
+  font-size: 0.9rem;
+}
+.banner-empty i { font-size: 2rem; }
+
+.banner-priority {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+}
+.priority-tag {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #f0f0f0;
+  color: #999;
+  font-weight: 500;
+}
+.priority-tag.active {
+  background: #1a1a2e;
+  color: white;
+}
+
+.banner-crop-wrap {
+  width: 100%;
+  height: 400px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.cropper { width: 100%; height: 100%; }
 .chat-id-row {
   display: flex;
   gap: 0.5rem;

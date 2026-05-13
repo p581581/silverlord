@@ -7,7 +7,9 @@
       "Bash(npm create:*)",
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
-      "Bash(go run:*)"
+      "Bash(go run:*)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\p5815\\\\OneDrive\\\\桌面\\\\Go\\\\silverLord\" -Recurse -Name)",
+      "Bash(Select-Object -First 50)"
     ]
   }
 }
