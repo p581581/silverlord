@@ -133,6 +133,7 @@ function logout() {
 .admin-main {
   margin-left: 220px;
   flex: 1;
+  min-width: 0;
   background: #f5f5f5;
   min-height: 100vh;
   padding: 2rem;
