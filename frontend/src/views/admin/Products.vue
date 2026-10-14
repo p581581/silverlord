@@ -6,12 +6,8 @@
     </div>
 
     <div class="section-card">
-      <p class="order-hint" role="status" aria-live="polite">
-        <i :class="orderSaving ? 'pi pi-spin pi-spinner' : 'pi pi-arrows-v'" aria-hidden="true" />
-        {{ t(orderSaving ? 'admin.savingProductOrder' : 'admin.productOrderHint') }}
-      </p>
       <DataTable :value="products" data-key="id" :loading="tableBusy" :pt="productTablePT" :table-style="{ minWidth: '1200px' }" striped-rows @row-reorder="saveProductOrder">
-        <Column :header="t('admin.image')" style="width: 80px">
+        <Column :header="t('admin.image')" style="width: 100px; white-space: nowrap">
           <template #body="{ data }">
             <img :src="resolveImage(data.image_url)" class="product-thumb" :alt="data.name" :draggable="false" />
           </template>
@@ -542,7 +538,6 @@ onMounted(fetchProducts)
 .product-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
 :deep(.product-draggable-row) { cursor: grab; user-select: none; }
 :deep(.product-draggable-row:active) { cursor: grabbing; }
-.order-hint { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem; color: #64748b; font-size: 0.85rem; }
 .price-tag { color: #c0392b; font-weight: 600; }
 .stock-zero { color: #e74c3c; font-weight: 700; }
 .text-muted { color: #aaa; }
