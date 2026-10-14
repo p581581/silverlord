@@ -2,7 +2,10 @@
   <div class="admin-layout">
     <!-- 側邊欄 -->
     <aside class="sidebar">
-      <div class="sidebar-brand">🥈 Silver Lord</div>
+      <div class="sidebar-brand">
+        <img src="@/assets/img/logo.png" alt="" class="sidebar-logo" />
+        <span class="sidebar-brand-text">SILVER LORD</span>
+      </div>
 
       <nav class="sidebar-nav">
         <RouterLink to="/admin/dashboard" class="nav-item">
@@ -98,11 +101,28 @@ function logout() {
   z-index: 50;
 }
 .sidebar-brand {
-  font-size: 1.1rem;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
   padding: 0.5rem 0 1.5rem;
   border-bottom: 1px solid #333;
   margin-bottom: 1rem;
+}
+.sidebar-logo {
+  height: 2rem;
+  width: auto;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+.sidebar-brand-text {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #f1f5f9;
+  white-space: nowrap;
 }
 .sidebar-nav {
   display: flex;
