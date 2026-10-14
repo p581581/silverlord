@@ -21,18 +21,20 @@ const (
 	ErrPriceNotReady ErrorCode = "PRICE_NOT_READY" // Cache 尚未初始化
 
 	// ── 商品 ────────────────────────────────────────────────────
-	ErrProductNotFound     ErrorCode = "PRODUCT_NOT_FOUND"
-	ErrProductNameRequired ErrorCode = "PRODUCT_NAME_REQUIRED"
+	ErrProductNotFound      ErrorCode = "PRODUCT_NOT_FOUND"
+	ErrProductNameRequired  ErrorCode = "PRODUCT_NAME_REQUIRED"
 	ErrProductInvalidWeight ErrorCode = "PRODUCT_INVALID_WEIGHT"
-	ErrProductInactive     ErrorCode = "PRODUCT_INACTIVE"
+	ErrProductInactive      ErrorCode = "PRODUCT_INACTIVE"
+	ErrProductInvalidOrder  ErrorCode = "PRODUCT_INVALID_ORDER"
+	ErrProductOrderChanged  ErrorCode = "PRODUCT_ORDER_CHANGED"
 
 	// ── 訂單 ────────────────────────────────────────────────────
-	ErrOrderItemsRequired  ErrorCode = "ORDER_ITEMS_REQUIRED"
-	ErrOrderInvalidQty     ErrorCode = "ORDER_INVALID_QTY"
-	ErrOrderNotFound       ErrorCode = "ORDER_NOT_FOUND"
+	ErrOrderItemsRequired   ErrorCode = "ORDER_ITEMS_REQUIRED"
+	ErrOrderInvalidQty      ErrorCode = "ORDER_INVALID_QTY"
+	ErrOrderNotFound        ErrorCode = "ORDER_NOT_FOUND"
 	ErrOrderAlreadyReported ErrorCode = "ORDER_ALREADY_REPORTED"
-	ErrOrderInvalidStatus  ErrorCode = "ORDER_INVALID_STATUS"
-	ErrOrderCreateFailed   ErrorCode = "ORDER_CREATE_FAILED"
+	ErrOrderInvalidStatus   ErrorCode = "ORDER_INVALID_STATUS"
+	ErrOrderCreateFailed    ErrorCode = "ORDER_CREATE_FAILED"
 
 	// ── 系統設定 ─────────────────────────────────────────────────
 	ErrConfigTgNotConfigured ErrorCode = "CONFIG_TG_NOT_CONFIGURED"
