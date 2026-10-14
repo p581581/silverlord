@@ -10,11 +10,10 @@
         <i :class="orderSaving ? 'pi pi-spin pi-spinner' : 'pi pi-arrows-v'" aria-hidden="true" />
         {{ t(orderSaving ? 'admin.savingProductOrder' : 'admin.productOrderHint') }}
       </p>
-      <DataTable :value="products" data-key="id" :loading="tableBusy" :table-style="{ minWidth: '1200px' }" striped-rows @row-reorder="saveProductOrder">
-        <Column :row-reorder="!tableBusy" :reorderable-column="false" :header="t('admin.productOrder')" style="width: 64px" />
+      <DataTable :value="products" data-key="id" :loading="tableBusy" :pt="productTablePT" :table-style="{ minWidth: '1200px' }" striped-rows @row-reorder="saveProductOrder">
         <Column :header="t('admin.image')" style="width: 80px">
           <template #body="{ data }">
-            <img :src="resolveImage(data.image_url)" class="product-thumb" :alt="data.name" />
+            <img :src="resolveImage(data.image_url)" class="product-thumb" :alt="data.name" :draggable="false" />
           </template>
         </Column>
         <Column :header="t('admin.name')" field="name" style="min-width: 240px" />
@@ -328,6 +327,21 @@ const stockTarget = ref<any>(null)
 const stockQtyInput = ref(0)
 const stockSaving = ref(false)
 const tableBusy = computed(() => loading.value || orderSaving.value || saving.value || stockSaving.value || actionSaving.value)
+const productTablePT = computed(() => ({
+  bodyRow: {
+    draggable: !tableBusy.value,
+    class: { 'product-draggable-row': !tableBusy.value },
+    onMousedown: prepareProductDrag,
+  },
+}))
+
+function prepareProductDrag(event: MouseEvent) {
+  const row = event.currentTarget as HTMLElement
+  const target = event.target as HTMLElement
+  // PrimeVue enables row dragging on mousedown; allow the whole row except controls.
+  row.draggable = !tableBusy.value && event.button === 0 &&
+    !target.closest('button, a, input, textarea, select, [role="button"], [contenteditable="true"]')
+}
 
 async function saveProductOrder(event: DataTableRowReorderEvent) {
   if (tableBusy.value) return
@@ -526,6 +540,8 @@ onMounted(fetchProducts)
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .product-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
+:deep(.product-draggable-row) { cursor: grab; user-select: none; }
+:deep(.product-draggable-row:active) { cursor: grabbing; }
 .order-hint { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem; color: #64748b; font-size: 0.85rem; }
 .price-tag { color: #c0392b; font-weight: 600; }
 .stock-zero { color: #e74c3c; font-weight: 700; }
