@@ -108,7 +108,7 @@ export default {
     expectedArrival: '入荷予定日',
     stockAdjust: '在庫調整',
     productOrder: '表示順',
-    productOrderHint: '左側のハンドルをドラッグして商品を並べ替えます。変更は自動保存されます。',
+    productOrderHint: '商品行を押したままドラッグして並べ替えます。変更は自動保存されます。',
     savingProductOrder: '商品の表示順を保存中…',
     productOrderSaved: '商品の表示順を保存しました',
     orderNo: '注文番号',
