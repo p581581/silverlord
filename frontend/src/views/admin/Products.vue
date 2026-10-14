@@ -2,17 +2,22 @@
   <div>
     <div class="page-header">
       <h1 class="page-title">{{ t('admin.products') }}</h1>
-      <Button :label="t('admin.addProduct')" icon="pi pi-plus" @click="openDialog()" />
+      <Button :label="t('admin.addProduct')" icon="pi pi-plus" :disabled="tableBusy" @click="openDialog()" />
     </div>
 
     <div class="section-card">
-      <DataTable :value="products" :loading="loading" striped-rows>
+      <p class="order-hint" role="status" aria-live="polite">
+        <i :class="orderSaving ? 'pi pi-spin pi-spinner' : 'pi pi-arrows-v'" aria-hidden="true" />
+        {{ t(orderSaving ? 'admin.savingProductOrder' : 'admin.productOrderHint') }}
+      </p>
+      <DataTable :value="products" data-key="id" :loading="tableBusy" :table-style="{ minWidth: '1200px' }" striped-rows @row-reorder="saveProductOrder">
+        <Column :row-reorder="!tableBusy" :reorderable-column="false" :header="t('admin.productOrder')" style="width: 64px" />
         <Column :header="t('admin.image')" style="width: 80px">
           <template #body="{ data }">
             <img :src="resolveImage(data.image_url)" class="product-thumb" :alt="data.name" />
           </template>
         </Column>
-        <Column :header="t('admin.name')" field="name" />
+        <Column :header="t('admin.name')" field="name" style="min-width: 240px" />
         <Column :header="t('admin.productType')">
           <template #body="{ data }">
             <Tag
@@ -54,13 +59,14 @@
         <Column :header="t('admin.config')" style="width: 180px">
           <template #body="{ data }">
             <div class="action-btns">
-              <Button icon="pi pi-pencil" size="small" text @click="openDialog(data)" />
+              <Button icon="pi pi-pencil" size="small" text :disabled="tableBusy" @click="openDialog(data)" />
               <Button
                 v-if="data.product_type === 'in_stock'"
                 icon="pi pi-warehouse"
                 size="small"
                 text
                 severity="info"
+                :disabled="tableBusy"
                 :title="t('admin.stockAdjust')"
                 @click="openStockModal(data)"
               />
@@ -69,6 +75,7 @@
                 size="small"
                 text
                 :severity="data.is_active ? 'warn' : 'success'"
+                :disabled="tableBusy"
                 @click="toggleProduct(data)"
               />
               <Button
@@ -76,6 +83,7 @@
                 size="small"
                 text
                 severity="danger"
+                :disabled="tableBusy"
                 @click="confirmDelete(data)"
               />
             </div>
@@ -249,11 +257,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import DataTable from 'primevue/datatable'
+import type { DataTableRowReorderEvent } from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -279,6 +288,8 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const saving = ref(false)
 const editTarget = ref<any>(null)
+const orderSaving = ref(false)
+const actionSaving = ref(false)
 
 // 日期 picker 綁定（DatePicker 用 Date 物件）
 const expectedArrivalDate = ref<Date | null>(null)
@@ -316,6 +327,32 @@ const stockModalVisible = ref(false)
 const stockTarget = ref<any>(null)
 const stockQtyInput = ref(0)
 const stockSaving = ref(false)
+const tableBusy = computed(() => loading.value || orderSaving.value || saving.value || stockSaving.value || actionSaving.value)
+
+async function saveProductOrder(event: DataTableRowReorderEvent) {
+  if (tableBusy.value) return
+  const previous = products.value
+  const reordered = event.value
+  if (reordered.every((product, index) => product.id === previous[index]?.id)) return
+
+  products.value = reordered
+  orderSaving.value = true
+  try {
+    await api.put('/api/admin/products/order', {
+      product_ids: reordered.map((product) => product.id),
+    })
+    products.value = reordered.map((product, index) => ({ ...product, sort_order: index + 1 }))
+    toast.add({ severity: 'success', summary: t('admin.productOrderSaved'), life: 2000 })
+  } catch (err: any) {
+    products.value = previous
+    toast.add({ severity: 'error', summary: t('admin.productOrder'), detail: err.userMessage, life: 5000 })
+    if (err.response?.status === 409) {
+      await fetchProducts().catch(() => {})
+    }
+  } finally {
+    orderSaving.value = false
+  }
+}
 
 function openStockModal(product: any) {
   stockTarget.value = product
@@ -383,11 +420,15 @@ async function saveProduct() {
 }
 
 async function toggleProduct(product: any) {
+  if (tableBusy.value) return
+  actionSaving.value = true
   try {
     await api.patch(`/api/admin/products/${product.id}/toggle`)
     await fetchProducts()
   } catch (err: any) {
     toast.add({ severity: 'error', summary: 'Error', detail: err.userMessage, life: 3000 })
+  } finally {
+    actionSaving.value = false
   }
 }
 
@@ -402,11 +443,15 @@ function confirmDelete(product: any) {
 }
 
 async function deleteProduct(id: number) {
+  if (tableBusy.value) return
+  actionSaving.value = true
   try {
     await api.delete(`/api/admin/products/${id}`)
     await fetchProducts()
   } catch (err: any) {
     toast.add({ severity: 'error', summary: 'Error', detail: err.userMessage, life: 3000 })
+  } finally {
+    actionSaving.value = false
   }
 }
 
@@ -481,6 +526,7 @@ onMounted(fetchProducts)
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .product-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
+.order-hint { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem; color: #64748b; font-size: 0.85rem; }
 .price-tag { color: #c0392b; font-weight: 600; }
 .stock-zero { color: #e74c3c; font-weight: 700; }
 .text-muted { color: #aaa; }
