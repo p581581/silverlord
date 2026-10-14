@@ -1,10 +1,5 @@
 <template>
   <div class="products-page">
-    <div class="page-header">
-      <h1 class="page-title">{{ t('admin.products') }}</h1>
-      <Button :label="t('admin.addProduct')" icon="pi pi-plus" :disabled="tableBusy" @click="openDialog()" />
-    </div>
-
     <div class="section-card">
       <DataTable :value="products" data-key="id" :loading="tableBusy" :pt="productTablePT" :table-style="{ minWidth: '1200px' }" striped-rows @row-reorder="saveProductOrder">
         <Column :header="t('admin.image')" style="width: 100px; white-space: nowrap">
@@ -51,10 +46,26 @@
             />
           </template>
         </Column>
-        <Column :header="t('admin.config')" style="width: 180px">
+        <Column style="width: 180px; min-width: 180px">
+          <template #header>
+            <div class="actions-header">
+              <span>{{ t('admin.config') }}</span>
+              <Button
+                icon="pi pi-plus"
+                class="product-add-btn"
+                size="small"
+                text
+                severity="contrast"
+                :aria-label="t('admin.addProduct')"
+                :title="t('admin.addProduct')"
+                :disabled="tableBusy"
+                @click="openDialog()"
+              />
+            </div>
+          </template>
           <template #body="{ data }">
             <div class="action-btns">
-              <Button icon="pi pi-pencil" size="small" text :disabled="tableBusy" @click="openDialog(data)" />
+              <Button icon="pi pi-pencil" size="small" text :aria-label="t('admin.editProduct')" :disabled="tableBusy" @click="openDialog(data)" />
               <Button
                 v-if="data.product_type === 'in_stock'"
                 icon="pi pi-warehouse"
@@ -62,15 +73,18 @@
                 text
                 severity="info"
                 :disabled="tableBusy"
+                :aria-label="t('admin.stockAdjust')"
                 :title="t('admin.stockAdjust')"
                 @click="openStockModal(data)"
               />
+              <span v-else aria-hidden="true" />
               <Button
                 :icon="data.is_active ? 'pi pi-eye-slash' : 'pi pi-eye'"
                 size="small"
                 text
                 :severity="data.is_active ? 'warn' : 'success'"
                 :disabled="tableBusy"
+                :aria-label="t('admin.toggleActive')"
                 @click="toggleProduct(data)"
               />
               <Button
@@ -79,6 +93,7 @@
                 text
                 severity="danger"
                 :disabled="tableBusy"
+                :aria-label="t('admin.deleteProduct')"
                 @click="confirmDelete(data)"
               />
             </div>
@@ -527,9 +542,7 @@ onMounted(fetchProducts)
 </script>
 
 <style scoped>
-.products-page { margin-top: -1.6rem; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.page-title { font-size: 1.5rem; font-weight: 700; }
+.products-page { margin-top: 3rem; }
 .section-card {
   background: white;
   border-radius: 12px;
@@ -542,7 +555,10 @@ onMounted(fetchProducts)
 .price-tag { color: #c0392b; font-weight: 600; }
 .stock-zero { color: #e74c3c; font-weight: 700; }
 .text-muted { color: #aaa; }
-.action-btns { display: flex; gap: 0.25rem; }
+.actions-header, .action-btns { display: grid; grid-template-columns: repeat(4, 2rem); gap: 0.25rem; align-items: center; }
+.actions-header > span { grid-column: span 3; white-space: nowrap; font-weight: 600; }
+.actions-header :deep(.p-button), .action-btns :deep(.p-button) { width: 2rem; height: 2rem; padding: 0; }
+.product-add-btn { color: #1a1a2e; }
 .dialog-form { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.4rem; }
 .field label { font-weight: 600; font-size: 0.85rem; }
