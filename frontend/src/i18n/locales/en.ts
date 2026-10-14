@@ -108,7 +108,7 @@ export default {
     expectedArrival: 'Est. Arrival',
     stockAdjust: 'Adjust Stock',
     productOrder: 'Order',
-    productOrderHint: 'Drag the handles on the left to reorder products. Changes are saved automatically.',
+    productOrderHint: 'Click and hold a product row to drag it into a new position. Changes are saved automatically.',
     savingProductOrder: 'Saving product order…',
     productOrderSaved: 'Product order saved',
     orderNo: 'Order No.',
