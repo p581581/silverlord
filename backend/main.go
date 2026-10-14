@@ -67,6 +67,7 @@ func main() {
 	// 商品
 	admin.GET("/products", handlers.AdminGetProducts)
 	admin.POST("/products", handlers.AdminCreateProduct)
+	admin.PUT("/products/order", handlers.AdminReorderProducts)
 	admin.PUT("/products/:id", handlers.AdminUpdateProduct)
 	admin.PATCH("/products/:id/toggle", handlers.AdminToggleProduct)
 	admin.PATCH("/products/:id/stock", handlers.AdminAdjustStock)
