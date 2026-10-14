@@ -108,7 +108,7 @@ export default {
     expectedArrival: '預計到貨',
     stockAdjust: '庫存調整',
     productOrder: '排序',
-    productOrderHint: '拖曳左側把手調整商品上下順序，放開後自動儲存。',
+    productOrderHint: '按住商品列即可拖曳調整上下順序，放開後自動儲存。',
     savingProductOrder: '正在儲存商品順序…',
     productOrderSaved: '商品順序已儲存',
     orderNo: '訂單編號',
