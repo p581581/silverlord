@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="products-page">
     <div class="page-header">
       <h1 class="page-title">{{ t('admin.products') }}</h1>
       <Button :label="t('admin.addProduct')" icon="pi pi-plus" :disabled="tableBusy" @click="openDialog()" />
@@ -527,6 +527,7 @@ onMounted(fetchProducts)
 </script>
 
 <style scoped>
+.products-page { margin-top: -1.6rem; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 .page-title { font-size: 1.5rem; font-weight: 700; }
 .section-card {
