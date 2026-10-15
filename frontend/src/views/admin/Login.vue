@@ -2,20 +2,21 @@
   <div class="login-page">
     <div class="login-card">
       <div class="login-header">
-        <span class="login-logo">🥈</span>
+        <img src="@/assets/img/logo.png" alt="Silver Lord" class="login-logo" />
         <h1>Silver Lord</h1>
         <p>{{ t('admin.login') }}</p>
       </div>
 
-      <form @submit.prevent="submit">
+      <form class="login-form" @submit.prevent="submit">
         <div class="field">
-          <label>{{ t('admin.password') }}</label>
           <Password
             v-model="password"
             :feedback="false"
+            :placeholder="t('admin.password')"
+            :aria-label="t('admin.password')"
             toggle-mask
-            class="w-full"
-            input-class="w-full"
+            class="login-password"
+            input-class="login-password-input"
             required />
         </div>
 
@@ -23,8 +24,7 @@
           type="submit"
           :label="t('admin.loginBtn')"
           icon="pi pi-sign-in"
-          :loading="loading"
-          class="w-full" />
+          :loading="loading" />
       </form>
 
       <div class="locale-row">
@@ -33,6 +33,7 @@
           :options="localeOptions"
           option-label="label"
           option-value="value"
+          size="small"
           @change="onLocaleChange" />
       </div>
     </div>
@@ -94,7 +95,7 @@ async function submit() {
 .login-card {
   background: white;
   border-radius: 16px;
-  padding: 2.5rem;
+  padding: 1.25rem 2.5rem 3.25rem;
   width: 100%;
   max-width: 400px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -102,39 +103,75 @@ async function submit() {
 
 .login-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .login-logo {
-  font-size: 3rem;
+  display: block;
+  height: 7.5rem;
+  width: auto;
+  margin: 0 auto;
 }
 
 .login-header h1 {
-  font-size: 1.5rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  margin: 0.5rem 0 0.25rem;
+  line-height: 1.25;
+  margin: 0.5rem 0 0;
 }
 
 .login-header p {
   color: #666;
-  font-size: 0.9rem;
+  font-size: 1.125rem;
+  line-height: 1.25;
+  margin: 0.625rem 0 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  width: 15rem;
+  max-width: calc(100% - 2.5rem);
   margin-bottom: 1.25rem;
 }
 
-.field label {
-  font-weight: 600;
+.login-password {
+  position: relative;
+  width: 100%;
+}
+
+.login-password :deep(.login-password-input) {
+  width: 100%;
+  height: 2.25rem;
   font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.login-password :deep(.login-password-input::placeholder) {
+  color: #111;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.login-password :deep(.p-password-toggle-mask-icon) {
+  position: absolute;
+  right: -1.75rem;
+  top: 50%;
+  margin-top: 0;
+  transform: translateY(-50%);
 }
 
 .locale-row {
   display: flex;
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+}
+
+.locale-row :deep(.p-select-dropdown) {
+  width: 2rem;
 }
 </style>

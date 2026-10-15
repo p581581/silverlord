@@ -14,6 +14,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"xorm.io/xorm"
 )
 
 // POST /api/v1/admin/login
@@ -55,7 +56,9 @@ type adminProductResponse struct {
 // GET /api/admin/products
 func AdminGetProducts(c echo.Context) error {
 	var products []models.Product
-	database.DB.Find(&products)
+	if err := database.DB.OrderBy("sort_order ASC, id ASC").Find(&products); err != nil {
+		return errInternal(c, err.Error())
+	}
 
 	var cfg models.SystemConfig
 	database.DB.ID(1).Get(&cfg)
@@ -84,7 +87,25 @@ func AdminCreateProduct(c echo.Context) error {
 	if p.Weight <= 0 {
 		return errBadRequest(c, ErrProductInvalidWeight, "weight must be greater than 0")
 	}
-	if _, err := database.DB.Insert(&p); err != nil {
+	session, err := beginProductOrderTransaction()
+	if err != nil {
+		return errInternal(c, err.Error())
+	}
+	defer session.Close()
+	defer session.Rollback()
+	var last []models.Product
+	if err := session.Cols("sort_order").Desc("sort_order").Limit(1).Find(&last); err != nil {
+		return errInternal(c, err.Error())
+	}
+	p.Id = 0
+	p.SortOrder = 1
+	if len(last) > 0 {
+		p.SortOrder = last[0].SortOrder + 1
+	}
+	if _, err := session.Insert(&p); err != nil {
+		return errInternal(c, err.Error())
+	}
+	if err := session.Commit(); err != nil {
 		return errInternal(c, err.Error())
 	}
 	return c.JSON(http.StatusCreated, p)
@@ -94,10 +115,14 @@ func AdminCreateProduct(c echo.Context) error {
 func AdminUpdateProduct(c echo.Context) error {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	var p models.Product
-	has, _ := database.DB.ID(id).Get(&p)
+	has, err := database.DB.ID(id).Get(&p)
+	if err != nil {
+		return errInternal(c, err.Error())
+	}
 	if !has {
 		return errNotFound(c, ErrProductNotFound, "product not found")
 	}
+	sortOrder := p.SortOrder
 	if err := c.Bind(&p); err != nil {
 		return errBadRequest(c, ErrInternal, err.Error())
 	}
@@ -108,8 +133,72 @@ func AdminUpdateProduct(c echo.Context) error {
 		return errBadRequest(c, ErrProductInvalidWeight, "weight must be greater than 0")
 	}
 	p.Id = id
-	database.DB.ID(id).AllCols().Update(&p)
+	p.SortOrder = sortOrder
+	// A stale edit form must never overwrite a separately saved row order.
+	if _, err := database.DB.ID(id).AllCols().Omit("sort_order").Update(&p); err != nil {
+		return errInternal(c, err.Error())
+	}
 	return c.JSON(http.StatusOK, p)
+}
+
+// Serialize list changes with PostgreSQL writers while assigning positions.
+func beginProductOrderTransaction() (*xorm.Session, error) {
+	session := database.DB.NewSession()
+	if err := session.Begin(); err != nil {
+		session.Close()
+		return nil, err
+	}
+	if _, err := session.Exec("LOCK TABLE product IN SHARE ROW EXCLUSIVE MODE"); err != nil {
+		session.Rollback()
+		session.Close()
+		return nil, err
+	}
+	return session, nil
+}
+
+// PUT /api/admin/products/order
+func AdminReorderProducts(c echo.Context) error {
+	var req struct {
+		ProductIDs []int64 `json:"product_ids"`
+	}
+	if err := c.Bind(&req); err != nil || req.ProductIDs == nil {
+		return errBadRequest(c, ErrProductInvalidOrder, "product_ids is required")
+	}
+	requested := make(map[int64]bool, len(req.ProductIDs))
+	for _, id := range req.ProductIDs {
+		if id <= 0 || requested[id] {
+			return errBadRequest(c, ErrProductInvalidOrder, "product IDs must be unique and positive")
+		}
+		requested[id] = true
+	}
+	session, err := beginProductOrderTransaction()
+	if err != nil {
+		return errInternal(c, err.Error())
+	}
+	defer session.Close()
+	defer session.Rollback()
+	var existing []models.Product
+	if err := session.Cols("id").Find(&existing); err != nil {
+		return errInternal(c, err.Error())
+	}
+	if len(existing) != len(req.ProductIDs) {
+		return errConflict(c, ErrProductOrderChanged, "product list changed; reload before reordering")
+	}
+	for _, p := range existing {
+		if !requested[p.Id] {
+			return errConflict(c, ErrProductOrderChanged, "product list changed; reload before reordering")
+		}
+	}
+	for i, id := range req.ProductIDs {
+		p := models.Product{SortOrder: int64(i + 1)}
+		if _, err := session.ID(id).Cols("sort_order").Update(&p); err != nil {
+			return errInternal(c, err.Error())
+		}
+	}
+	if err := session.Commit(); err != nil {
+		return errInternal(c, err.Error())
+	}
+	return c.NoContent(http.StatusNoContent)
 }
 
 // PATCH /api/admin/products/:id/toggle

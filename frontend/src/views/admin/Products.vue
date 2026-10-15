@@ -1,18 +1,13 @@
 <template>
-  <div>
-    <div class="page-header">
-      <h1 class="page-title">{{ t('admin.products') }}</h1>
-      <Button :label="t('admin.addProduct')" icon="pi pi-plus" @click="openDialog()" />
-    </div>
-
+  <div class="products-page">
     <div class="section-card">
-      <DataTable :value="products" :loading="loading" striped-rows>
-        <Column :header="t('admin.image')" style="width: 80px">
+      <DataTable :value="products" data-key="id" :loading="tableBusy" :pt="productTablePT" :table-style="{ minWidth: '1200px' }" striped-rows @row-reorder="saveProductOrder">
+        <Column :header="t('admin.image')" style="width: 100px; white-space: nowrap">
           <template #body="{ data }">
-            <img :src="resolveImage(data.image_url)" class="product-thumb" :alt="data.name" />
+            <img :src="resolveImage(data.image_url)" class="product-thumb" :alt="data.name" :draggable="false" />
           </template>
         </Column>
-        <Column :header="t('admin.name')" field="name" />
+        <Column :header="t('admin.name')" field="name" style="min-width: 240px" />
         <Column :header="t('admin.productType')">
           <template #body="{ data }">
             <Tag
@@ -51,24 +46,45 @@
             />
           </template>
         </Column>
-        <Column :header="t('admin.config')" style="width: 180px">
+        <Column style="width: 180px; min-width: 180px">
+          <template #header>
+            <div class="actions-header">
+              <span>{{ t('admin.config') }}</span>
+              <Button
+                icon="pi pi-plus"
+                class="product-add-btn"
+                size="small"
+                text
+                severity="contrast"
+                :aria-label="t('admin.addProduct')"
+                :title="t('admin.addProduct')"
+                :disabled="tableBusy"
+                @click="openDialog()"
+              />
+            </div>
+          </template>
           <template #body="{ data }">
             <div class="action-btns">
-              <Button icon="pi pi-pencil" size="small" text @click="openDialog(data)" />
+              <Button icon="pi pi-pencil" size="small" text :aria-label="t('admin.editProduct')" :disabled="tableBusy" @click="openDialog(data)" />
               <Button
                 v-if="data.product_type === 'in_stock'"
                 icon="pi pi-warehouse"
                 size="small"
                 text
                 severity="info"
+                :disabled="tableBusy"
+                :aria-label="t('admin.stockAdjust')"
                 :title="t('admin.stockAdjust')"
                 @click="openStockModal(data)"
               />
+              <span v-else aria-hidden="true" />
               <Button
                 :icon="data.is_active ? 'pi pi-eye-slash' : 'pi pi-eye'"
                 size="small"
                 text
                 :severity="data.is_active ? 'warn' : 'success'"
+                :disabled="tableBusy"
+                :aria-label="t('admin.toggleActive')"
                 @click="toggleProduct(data)"
               />
               <Button
@@ -76,6 +92,8 @@
                 size="small"
                 text
                 severity="danger"
+                :disabled="tableBusy"
+                :aria-label="t('admin.deleteProduct')"
                 @click="confirmDelete(data)"
               />
             </div>
@@ -249,11 +267,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import DataTable from 'primevue/datatable'
+import type { DataTableRowReorderEvent } from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -279,6 +298,8 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const saving = ref(false)
 const editTarget = ref<any>(null)
+const orderSaving = ref(false)
+const actionSaving = ref(false)
 
 // 日期 picker 綁定（DatePicker 用 Date 物件）
 const expectedArrivalDate = ref<Date | null>(null)
@@ -316,6 +337,47 @@ const stockModalVisible = ref(false)
 const stockTarget = ref<any>(null)
 const stockQtyInput = ref(0)
 const stockSaving = ref(false)
+const tableBusy = computed(() => loading.value || orderSaving.value || saving.value || stockSaving.value || actionSaving.value)
+const productTablePT = computed(() => ({
+  bodyRow: {
+    draggable: !tableBusy.value,
+    class: { 'product-draggable-row': !tableBusy.value },
+    onMousedown: prepareProductDrag,
+  },
+}))
+
+function prepareProductDrag(event: MouseEvent) {
+  const row = event.currentTarget as HTMLElement
+  const target = event.target as HTMLElement
+  // PrimeVue enables row dragging on mousedown; allow the whole row except controls.
+  row.draggable = !tableBusy.value && event.button === 0 &&
+    !target.closest('button, a, input, textarea, select, [role="button"], [contenteditable="true"]')
+}
+
+async function saveProductOrder(event: DataTableRowReorderEvent) {
+  if (tableBusy.value) return
+  const previous = products.value
+  const reordered = event.value
+  if (reordered.every((product, index) => product.id === previous[index]?.id)) return
+
+  products.value = reordered
+  orderSaving.value = true
+  try {
+    await api.put('/api/admin/products/order', {
+      product_ids: reordered.map((product) => product.id),
+    })
+    products.value = reordered.map((product, index) => ({ ...product, sort_order: index + 1 }))
+    toast.add({ severity: 'success', summary: t('admin.productOrderSaved'), life: 2000 })
+  } catch (err: any) {
+    products.value = previous
+    toast.add({ severity: 'error', summary: t('admin.productOrder'), detail: err.userMessage, life: 5000 })
+    if (err.response?.status === 409) {
+      await fetchProducts().catch(() => {})
+    }
+  } finally {
+    orderSaving.value = false
+  }
+}
 
 function openStockModal(product: any) {
   stockTarget.value = product
@@ -383,11 +445,15 @@ async function saveProduct() {
 }
 
 async function toggleProduct(product: any) {
+  if (tableBusy.value) return
+  actionSaving.value = true
   try {
     await api.patch(`/api/admin/products/${product.id}/toggle`)
     await fetchProducts()
   } catch (err: any) {
     toast.add({ severity: 'error', summary: 'Error', detail: err.userMessage, life: 3000 })
+  } finally {
+    actionSaving.value = false
   }
 }
 
@@ -402,11 +468,15 @@ function confirmDelete(product: any) {
 }
 
 async function deleteProduct(id: number) {
+  if (tableBusy.value) return
+  actionSaving.value = true
   try {
     await api.delete(`/api/admin/products/${id}`)
     await fetchProducts()
   } catch (err: any) {
     toast.add({ severity: 'error', summary: 'Error', detail: err.userMessage, life: 3000 })
+  } finally {
+    actionSaving.value = false
   }
 }
 
@@ -472,8 +542,7 @@ onMounted(fetchProducts)
 </script>
 
 <style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.page-title { font-size: 1.5rem; font-weight: 700; }
+.products-page { margin-top: 3rem; }
 .section-card {
   background: white;
   border-radius: 12px;
@@ -481,10 +550,15 @@ onMounted(fetchProducts)
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .product-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
+:deep(.product-draggable-row) { cursor: grab; user-select: none; }
+:deep(.product-draggable-row:active) { cursor: grabbing; }
 .price-tag { color: #c0392b; font-weight: 600; }
 .stock-zero { color: #e74c3c; font-weight: 700; }
 .text-muted { color: #aaa; }
-.action-btns { display: flex; gap: 0.25rem; }
+.actions-header, .action-btns { display: grid; grid-template-columns: repeat(4, 2rem); gap: 0.25rem; align-items: center; }
+.actions-header > span { grid-column: span 3; white-space: nowrap; font-weight: 600; }
+.actions-header :deep(.p-button), .action-btns :deep(.p-button) { width: 2rem; height: 2rem; padding: 0; }
+.product-add-btn { color: #1a1a2e; }
 .dialog-form { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.4rem; }
 .field label { font-weight: 600; font-size: 0.85rem; }
